@@ -61,6 +61,7 @@ print(np.mean(A))
 print ("-----------------------------------------------------")
 
 print ("\nQuestion 1(m): ")
+print(np.log(np.square(A)))
 print ("-----------------------------------------------------")
 
 print ("\nQuestion 1(n): ")
