@@ -2,7 +2,9 @@ import numpy as np
 import numpy.random as rnd
 import time
 from numpy import linalg as la
-
+import pickle
+import math
+import matplotlib.pyplot as plt
 #Question 1
 
 """
@@ -73,7 +75,7 @@ print ("\nQuestion 1(n): ")
 print(np.dot(np.transpose(A), x))
 print ("-----------------------------------------------------")
 
-"""
+
 
 #Question 2
 print("-----------------------------------------------------------------------")
@@ -120,3 +122,50 @@ print("-----------------------------------------------------------------------")
 print("Question 2 c) N=2000")
 mymeasure(2000)
 print("-----------------------------------------------------------------------")
+"""
+
+
+#Question 4
+
+with open('data1.pickle','rb') as f:
+    dataTrain, dataTest = pickle.load(f)
+
+
+#Question 4a)
+
+def K_n(X, S, sigma):
+
+            return math.exp((math.pow((X - S), 2)/-(2*sigma)))
+
+def kernelMatrix(X, S, sigma):
+
+    new_X = np.repeat(X[None], S.shape[0], axis=0).T
+
+    form_K = np.vectorize(K_n)
+
+    ones = np.ones(X.shape[0])
+
+    K_without_ones = form_K(new_X, S, sigma)
+
+
+    return np.insert(K_without_ones, 0, ones, axis=1)
+
+# Question 4b)
+
+def plotBasis(S, sigma):
+
+
+    x = np.linspace(-1, 1, 1000)
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.suptitle('Question 4(b): some basis functions with sigma = 0.2')
+    plt.plot(x, kernelMatrix(x, S, sigma))
+    plt.show()
+
+print(dataTrain[:, 0])
+plotBasis(dataTrain[:, 0][:3], sigma=0.2)
+
+def check_plot(X, S,sigma):
+
+    pass
+
