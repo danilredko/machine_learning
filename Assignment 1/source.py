@@ -135,7 +135,7 @@ with open('data1.pickle','rb') as f:
 
 def K_n(X, S, sigma):
 
-            return math.exp((math.pow((X - S), 2)/-(2*sigma)))
+            return math.exp((math.pow((X - S), 2)/-(2*sigma*sigma)))
 
 def kernelMatrix(X, S, sigma):
 
@@ -147,25 +147,22 @@ def kernelMatrix(X, S, sigma):
 
     K_without_ones = form_K(new_X, S, sigma)
 
+    finalK = np.insert(K_without_ones, 0, ones, axis=1)
 
-    return np.insert(K_without_ones, 0, ones, axis=1)
+    return finalK
 
 # Question 4b)
 
 def plotBasis(S, sigma):
 
-
-    x = np.linspace(-1, 1, 1000)
+    x = np.linspace(0, 1, 1000)
     plt.xlabel('x')
     plt.ylabel('y')
     plt.suptitle('Question 4(b): some basis functions with sigma = 0.2')
+    print(kernelMatrix(x, S, sigma))
     plt.plot(x, kernelMatrix(x, S, sigma))
     plt.show()
 
-print(dataTrain[:, 0])
-plotBasis(dataTrain[:, 0][:3], sigma=0.2)
 
-def check_plot(X, S,sigma):
-
-    pass
+plotBasis(dataTrain[:, 0][:5], sigma=0.2)
 
