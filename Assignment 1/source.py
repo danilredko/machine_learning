@@ -150,9 +150,9 @@ def kernelMatrix(X, S, sigma):
 
     finalK = np.insert(K_without_ones, 0, ones, axis=1)
 
-    print("Final shape: "+str(finalK.shape))
-
     return finalK
+
+
 
 # Question 4b)
 
@@ -162,46 +162,80 @@ def plotBasis(S, sigma):
     plt.xlabel('x')
     plt.ylabel('y')
     plt.suptitle('Question 4(b): some basis functions with sigma = 0.2')
-    plt.plot(x, kernelMatrix(x, S, sigma))
+    K = kernelMatrix(x, S, sigma)
+    plt.plot(x, K)
     plt.show()
 
 #plotBasis(dataTrain[:, 0][:5], sigma=0.2)
 
 # Question 4 c)
 
-t_n = dataTrain[:, 1]
-S = dataTrain[:, 0]
-print(dataTrain)
-K = kernelMatrix(S, t_n, 0.2)
-print(K.shape)
-
 
 def myfit(S,sigma):
 
+    t_n = dataTrain[:, 1][:S.shape[0]]
+
+    K = kernelMatrix(S, t_n, sigma)
+
     w = lin.lstsq(K, t_n)[0]
 
+
     #!!! do the error too
+    print(w)
+    return w
 
-    return w.reshape(16)
+# Question 4 d)
 
-w  = myfit(S, 0.2)
-print(w.shape)
+'''
+t_n = dataTrain[:, 1][:5]
+
+K = kernelMatrix(S, t_n, 0.2)
+
+'''
+
 
 def plotY(w,S,sigma):
 
-    x = np.linspace(0,1,1000)
-    plt.xlabel('x')
-    plt.ylabel('y')
-    plt.suptitle('Question 4 d)')
+    t_n = dataTrain[:, 1][:S.shape[0]]
 
+
+    x = np.linspace(0,1,1000)
+
+    plt.xlabel('x')
+    plt.ylabel('t')
     K = kernelMatrix(x, t_n, sigma)
-    Y = np.dot(K, w)
-    plt.plot(x, Y, color='red')
+
+    Y = K.dot(w)
+
+    plt.plot(x, Y , color='red')
     plt.scatter(S, t_n)
     plt.ylim(-15, 15)
 
+
+# Question 4 e)
+'''
+plt.suptitle('Question 4 d)')
+plotY(myfit(dataTrain[:, 0][:5], 0.2), dataTrain[:, 0][:5], 0.2)
+plt.show()
+'''
+
+# Question 4 f)
+
+def bestM(sigma):
+
+    for i in range(1,17):
+        print(i)
+        plt.subplot(4, 4, i)
+        plotY(myfit(dataTrain[:, 0][:i], 0.2), dataTrain[:, 0][:i], sigma)
+    plt.suptitle('Question 4 f)')
     plt.show()
 
-plotY(w, S, 0.2)
 
+'''
+bestM(0.2)
+
+'''
+
+plotY(myfit(dataTrain[:, 0][:5], 0.2), dataTrain[:, 0][:5], 0.2)
+plt.show()
 
