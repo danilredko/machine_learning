@@ -5,6 +5,7 @@ from numpy import linalg as la
 import pickle
 import math
 import matplotlib.pyplot as plt
+import numpy.linalg as lin
 #Question 1
 
 """
@@ -149,6 +150,8 @@ def kernelMatrix(X, S, sigma):
 
     finalK = np.insert(K_without_ones, 0, ones, axis=1)
 
+    print("Final shape: "+str(finalK.shape))
+
     return finalK
 
 # Question 4b)
@@ -159,10 +162,46 @@ def plotBasis(S, sigma):
     plt.xlabel('x')
     plt.ylabel('y')
     plt.suptitle('Question 4(b): some basis functions with sigma = 0.2')
-    print(kernelMatrix(x, S, sigma))
     plt.plot(x, kernelMatrix(x, S, sigma))
     plt.show()
 
+#plotBasis(dataTrain[:, 0][:5], sigma=0.2)
 
-plotBasis(dataTrain[:, 0][:5], sigma=0.2)
+# Question 4 c)
+
+t_n = dataTrain[:, 1]
+S = dataTrain[:, 0]
+print(dataTrain)
+K = kernelMatrix(S, t_n, 0.2)
+print(K.shape)
+
+
+def myfit(S,sigma):
+
+    w = lin.lstsq(K, t_n)[0]
+
+    #!!! do the error too
+
+    return w.reshape(16)
+
+w  = myfit(S, 0.2)
+print(w.shape)
+
+def plotY(w,S,sigma):
+
+    x = np.linspace(0,1,1000)
+    plt.xlabel('x')
+    plt.ylabel('y')
+    plt.suptitle('Question 4 d)')
+
+    K = kernelMatrix(x, t_n, sigma)
+    Y = np.dot(K, w)
+    plt.plot(x, Y, color='red')
+    plt.scatter(S, t_n)
+    plt.ylim(-15, 15)
+
+    plt.show()
+
+plotY(w, S, 0.2)
+
 
