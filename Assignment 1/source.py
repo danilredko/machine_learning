@@ -153,7 +153,6 @@ def kernelMatrix(X, S, sigma):
     return finalK
 
 
-
 # Question 4b)
 
 def plotBasis(S, sigma):
@@ -166,50 +165,45 @@ def plotBasis(S, sigma):
     plt.plot(x, K)
     plt.show()
 
-#plotBasis(dataTrain[:, 0][:5], sigma=0.2)
+plotBasis(dataTrain[:, 0][:5], sigma=0.2)
 
 # Question 4 c)
+
 
 
 def myfit(S,sigma):
 
     t_n = dataTrain[:, 1][:S.shape[0]]
 
-    K = kernelMatrix(S, t_n, sigma)
+    X = dataTrain[:, 0][:S.shape[0]]
+
+    K = kernelMatrix(X , S, 0.2)
 
     w = lin.lstsq(K, t_n)[0]
 
+    Y = K.dot(w)
 
-    #!!! do the error too
-    print(w)
-    return w
+    err_train = np.sum(np.divide(np.power(np.subtract(t_n, Y ),2), dataTrain.shape[0]))
+
+    err_test = np.sum(np.divide(np.power(np.subtract(t_n, Y ),2), dataTest.shape[0]))
+
+    return w, err_train, err_test
 
 # Question 4 d)
-
-'''
-t_n = dataTrain[:, 1][:5]
-
-K = kernelMatrix(S, t_n, 0.2)
-
-'''
 
 
 def plotY(w,S,sigma):
 
     t_n = dataTrain[:, 1][:S.shape[0]]
-
-
     x = np.linspace(0,1,1000)
-
     plt.xlabel('x')
     plt.ylabel('t')
-    K = kernelMatrix(x, t_n, sigma)
-
+    K = kernelMatrix(x, S, sigma)
     Y = K.dot(w)
-
-    plt.plot(x, Y , color='red')
+    plt.plot(x, Y, color='red')
     plt.scatter(S, t_n)
     plt.ylim(-15, 15)
+
 
 
 # Question 4 e)
@@ -223,19 +217,46 @@ plt.show()
 
 def bestM(sigma):
 
-    for i in range(1,17):
-        print(i)
-        plt.subplot(4, 4, i)
-        plotY(myfit(dataTrain[:, 0][:i], 0.2), dataTrain[:, 0][:i], sigma)
-    plt.suptitle('Question 4 f)')
+    f = plt.figure()
+
+    for M in range(1,17):
+        plt.subplot(4, 4, M)
+        S = dataTrain[:, 0]
+        plt.title('M = {}'.format(M-1))
+        plt.subplots_adjust(wspace=0.5, hspace =1)
+
+        w, err_train, err_test = myfit(S[:M], 0.2)
+
+        plotY(w, S[:M], sigma)
+
+
+
+
+
+    plt.suptitle('Question 4 (f) Best-Fitting functions with 0-15 basis functions')
     plt.show()
 
 
-'''
+
+
+
 bestM(0.2)
 
+
+
+'''
+S = dataTrain[:, 0]
+t_n = dataTrain[:, 1]
+
+print(kernelMatrix(S, t_n, 0.2) )
+print("___________________________________________")
+print()
+
+plotY(myfit(S , 0.2) , S, sigma=0.2)
+
+
+plt.show()
+
 '''
 
-plotY(myfit(dataTrain[:, 0][:5], 0.2), dataTrain[:, 0][:5], 0.2)
-plt.show()
 
