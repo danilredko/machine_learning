@@ -5,7 +5,9 @@ from numpy import linalg as la
 import pickle
 import math
 import matplotlib.pyplot as plt
-import numpy.linalg as lin
+import numpy.linalg as linalg
+import sys
+import sklearn.linear_model as lin
 #Question 1
 
 """
@@ -140,13 +142,19 @@ def K_n(X, S, sigma):
 
 def kernelMatrix(X, S, sigma):
 
+    if S.shape[0] == 0:
+        return np.ones([X.shape[0], 1])
+
+    if X.shape[0] == 0:
+        return np.array([])
+
     new_X = np.repeat(X[None], S.shape[0], axis=0).T
 
     form_K = np.vectorize(K_n)
 
     ones = np.ones(X.shape[0])
 
-    K_without_ones = form_K(new_X, S, sigma)
+    K_without_ones = form_K(new_X, S , sigma)
 
     finalK = np.insert(K_without_ones, 0, ones, axis=1)
 
@@ -165,44 +173,80 @@ def plotBasis(S, sigma):
     plt.plot(x, K)
     plt.show()
 
-plotBasis(dataTrain[:, 0][:5], sigma=0.2)
+#plotBasis(dataTrain[:, 0][:5], sigma=0.2)
 
 # Question 4 c)
 
 
+def myfit(S, sigma):
 
-def myfit(S,sigma):
 
-    t_n = dataTrain[:, 1][:S.shape[0]]
+    #work for bestM
+    #t_n = dataTrain[:, 1][:S.shape[0]]
 
-    X = dataTrain[:, 0][:S.shape[0]]
+    #works for errors
 
-    K = kernelMatrix(X , S, 0.2)
 
-    w = lin.lstsq(K, t_n)[0]
+    #work for bestM
+    #X = dataTrain[:, 0][:S.shape[0]]
 
-    Y = K.dot(w)
+    #works for errors
 
-    err_train = np.sum(np.divide(np.power(np.subtract(t_n, Y ),2), dataTrain.shape[0]))
+    # Training data
 
-    err_test = np.sum(np.divide(np.power(np.subtract(t_n, Y ),2), dataTest.shape[0]))
+    tTrain = dataTrain[:, 1]
+    tTrain = tTrain.reshape(tTrain.shape[0], 1)
 
-    return w, err_train, err_test
+    #print('tTrain: '+str(tTrain.shape))
+
+    #print('S shape: '+str(S.shape))
+
+    Xtrain = dataTrain[:, 0]
+
+    K_train = kernelMatrix(Xtrain, S, sigma)
+
+    #print("K shape: "+str(K_train.shape))
+
+    w = linalg.lstsq(K_train, tTrain, rcond=None)[0]
+
+    #print("W shape: "+str(w.shape))
+
+    #print(w)
+
+    Ytrain = K_train.dot(w)
+
+    err_train = np.divide(np.power(np.subtract(tTrain, Ytrain), 2), tTrain.shape[0])
+
+    # Testing data
+
+    tTest = dataTest[:, 1]
+    tTest = tTest.reshape(tTest.shape[0], 1)
+
+    Xtest = dataTest[:, 0]
+
+    K_test = kernelMatrix(Xtest, S, sigma)
+
+    Y_test = K_test.dot(w)
+
+    err_test = np.divide(np.power(np.subtract(tTest, Y_test), 2), dataTest.shape[0])
+
+    return w, np.sum(err_train), np.sum(err_test)
 
 # Question 4 d)
 
 
-def plotY(w,S,sigma):
+def plotY(w, S, sigma):
 
-    t_n = dataTrain[:, 1][:S.shape[0]]
-    x = np.linspace(0,1,1000)
+    x = np.linspace(0, 1, 1000)
     plt.xlabel('x')
     plt.ylabel('t')
     K = kernelMatrix(x, S, sigma)
+    #print(K)
     Y = K.dot(w)
     plt.plot(x, Y, color='red')
-    plt.scatter(S, t_n)
+    plt.scatter(dataTrain[:, 0], dataTrain[:, 1])
     plt.ylim(-15, 15)
+    plt.xlim(0, 1)
 
 
 
@@ -217,46 +261,63 @@ plt.show()
 
 def bestM(sigma):
 
-    f = plt.figure()
-
-    for M in range(1,17):
-        plt.subplot(4, 4, M)
+    for M in range(0, 16):
+        plt.subplot(4, 4, M+1)
         S = dataTrain[:, 0]
-        plt.title('M = {}'.format(M-1))
+        plt.title('M = {}'.format(M))
         plt.subplots_adjust(wspace=0.5, hspace =1)
-
         w, err_train, err_test = myfit(S[:M], 0.2)
-
         plotY(w, S[:M], sigma)
-
-
-
-
 
     plt.suptitle('Question 4 (f) Best-Fitting functions with 0-15 basis functions')
     plt.show()
 
 
 
+    errTrain = np.array([])
+    errTest = np.array([])
+    M = range(16)
+    for m in M:
+
+        w, err_train, err_test = myfit(dataTrain[:m, 0], 0.2)
+
+        errTrain = np.append(errTrain, err_train)
+
+        errTest = np.append(errTest, err_test)
+
+    print("Train Errors : "+str(errTrain))
+    print("")
+    print("Test Errors : "+str(errTest))
+    plt.plot(M, errTrain, 'blue', label='Train Error')
+    plt.plot(M, errTest, 'red', label='Test Error')
+    plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3, ncol=2, mode="expand", borderaxespad=0.)
+    plt.suptitle("Question 4(f): training and test error")
+    plt.ylim(0, 250)
+    plt.show()
 
 
 bestM(0.2)
 
+#print(myfit(dataTrain[0:5, 0], 0.2))
+#print(dataTrain[0:0, 0].shape)
+#print(kernelMatrix(dataTrain[0:0, 0], dataTrain[0:3, 0], 0.2))
+
+# Question 5
+
+with open('data2.pickle','rb') as f:
+    dataVal, dataTest = pickle.load(f)
 
 
-'''
-S = dataTrain[:, 0]
-t_n = dataTrain[:, 1]
+def regFit(S, sigma, alpha):
 
-print(kernelMatrix(S, t_n, 0.2) )
-print("___________________________________________")
-print()
+    t = dataTest[:, 1]
 
-plotY(myfit(S , 0.2) , S, sigma=0.2)
+    K = kernelMatrix(t, S, sigma)
 
+    ridge = lin.Ridge(alpha)
 
-plt.show()
+    ridge.fit(K, t)
 
-'''
+    w = ridge.coef_
 
-
+    w[0] = ridge.intercept_
