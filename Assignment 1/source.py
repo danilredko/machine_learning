@@ -130,6 +130,8 @@ print("-----------------------------------------------------------------------")
 
 # Question 4
 
+
+
 with open('data1.pickle','rb') as f:
     dataTrain, dataTest = pickle.load(f)
 
@@ -173,7 +175,7 @@ def plotBasis(S, sigma):
     plt.plot(x, K)
     plt.show()
 
-plotBasis(dataTrain[:, 0][:5], sigma=0.2)
+#plotBasis(dataTrain[:, 0][:5], sigma=0.2)
 
 # Question 4 c)
 
@@ -194,7 +196,7 @@ def myfit(S, sigma):
 
     Ytrain = K_train.dot(w)
 
-    err_train = np.divide(np.power(np.subtract(tTrain, Ytrain), 2), tTrain.shape[0])
+    train_error = np.divide(np.power(np.subtract(tTrain, Ytrain), 2), tTrain.shape[0])
 
     # Testing data
 
@@ -207,12 +209,11 @@ def myfit(S, sigma):
 
     Y_test = K_test.dot(w)
 
-    err_test = np.divide(np.power(np.subtract(tTest, Y_test), 2), dataTest.shape[0])
+    test_error = np.divide(np.power(np.subtract(tTest, Y_test), 2), dataTest.shape[0])
 
-    return w, np.sum(err_train), np.sum(err_test)
+    return w, np.sum(train_error), np.sum(test_error)
 
 # Question 4 d)
-
 
 def plotY(w, S, sigma):
 
@@ -220,7 +221,6 @@ def plotY(w, S, sigma):
     plt.xlabel('x')
     plt.ylabel('t')
     K = kernelMatrix(x, S, sigma)
-    #print(K)
     Y = K.dot(w)
     plt.plot(x, Y, color='red')
     plt.scatter(dataTrain[:, 0], dataTrain[:, 1])
@@ -228,13 +228,14 @@ def plotY(w, S, sigma):
     plt.xlim(0, 1)
 
 
-
 # Question 4 e)
-'''
-plt.suptitle('Question 4 d)')
-plotY(myfit(dataTrain[:, 0][:5], 0.2), dataTrain[:, 0][:5], 0.2)
-plt.show()
-'''
+
+def q4e():
+
+    plt.suptitle('Question 4 (e): the fitted function (5 basis functions) ')
+    w, train_error, test_error = myfit(dataTrain[:, 0][:5], 0.2)
+    plotY(w, dataTrain[:, 0][:5], 0.2)
+    plt.show()
 
 # Question 4 f)
 
@@ -291,8 +292,7 @@ def bestM(sigma):
     plt.show()
 
 
-bestM(0.2)
-
+#bestM(0.2)
 
 
 # Question 5
@@ -303,14 +303,46 @@ with open('data2.pickle','rb') as f:
 
 def regFit(S, sigma, alpha):
 
-    t = dataTest[:, 1]
+    tTrain = dataTrain[:, 1]
+    xTrain = dataTrain[:, 0]
 
-    K = kernelMatrix(t, S, sigma)
+    K_train = kernelMatrix(xTrain, S, sigma)
 
     ridge = lin.Ridge(alpha)
 
-    ridge.fit(K, t)
+    ridge.fit(K_train, tTrain)
 
     w = ridge.coef_
 
     w[0] = ridge.intercept_
+
+    Ytrain = K_train.dot(w)
+
+    train_error = np.divide(np.power(np.subtract(tTrain, Ytrain), 2), tTrain.shape[0])
+
+    tVal = dataVal[:, 1]
+
+    xVal = dataVal[:, 0]
+
+    K_val = kernelMatrix(xVal, S, sigma)
+
+    Yval = K_val.dot(w)
+
+    validation_error = np.divide(np.power(np.subtract(tVal, Yval), 2), dataVal.shape[0])
+
+    return w , np.sum(train_error) , np.sum(validation_error)
+
+def Q5b():
+
+    w, train_error, validation_error = regFit(dataTrain[:, 0], 0.2, 1)
+    plotY(w,dataTrain[:, 0], 0.2)
+    plt.suptitle("Question 5(b): the fitted function (alpha=1)")
+    plt.show()
+
+def bestAlpha(S, sigma):
+
+    alphas = np.power(10.0, np.arange(-12, 4, 1, dtype=int) )
+
+    print(alphas)
+
+bestAlpha(dataTrain[:,0], 0.2)
