@@ -128,13 +128,13 @@ print("-----------------------------------------------------------------------")
 """
 
 
-#Question 4
+# Question 4
 
 with open('data1.pickle','rb') as f:
     dataTrain, dataTest = pickle.load(f)
 
 
-#Question 4a)
+# Question 4a)
 
 def K_n(X, S, sigma):
 
@@ -173,7 +173,7 @@ def plotBasis(S, sigma):
     plt.plot(x, K)
     plt.show()
 
-#plotBasis(dataTrain[:, 0][:5], sigma=0.2)
+plotBasis(dataTrain[:, 0][:5], sigma=0.2)
 
 # Question 4 c)
 
@@ -181,37 +181,16 @@ def plotBasis(S, sigma):
 def myfit(S, sigma):
 
 
-    #work for bestM
-    #t_n = dataTrain[:, 1][:S.shape[0]]
-
-    #works for errors
-
-
-    #work for bestM
-    #X = dataTrain[:, 0][:S.shape[0]]
-
-    #works for errors
-
     # Training data
 
     tTrain = dataTrain[:, 1]
     tTrain = tTrain.reshape(tTrain.shape[0], 1)
 
-    #print('tTrain: '+str(tTrain.shape))
-
-    #print('S shape: '+str(S.shape))
-
     Xtrain = dataTrain[:, 0]
 
     K_train = kernelMatrix(Xtrain, S, sigma)
 
-    #print("K shape: "+str(K_train.shape))
-
     w = linalg.lstsq(K_train, tTrain, rcond=None)[0]
-
-    #print("W shape: "+str(w.shape))
-
-    #print(w)
 
     Ytrain = K_train.dot(w)
 
@@ -266,41 +245,55 @@ def bestM(sigma):
         S = dataTrain[:, 0]
         plt.title('M = {}'.format(M))
         plt.subplots_adjust(wspace=0.5, hspace =1)
-        w, err_train, err_test = myfit(S[:M], 0.2)
+        w, train_error, test_error = myfit(S[:M], 0.2)
         plotY(w, S[:M], sigma)
 
     plt.suptitle('Question 4 (f) Best-Fitting functions with 0-15 basis functions')
     plt.show()
 
+    TrainErrors = np.array([])
+    TestErrors = np.array([])
+    xAxis = range(16)
 
+    for m in xAxis:
 
-    errTrain = np.array([])
-    errTest = np.array([])
-    M = range(16)
-    for m in M:
+        w, train_error, test_error = myfit(dataTrain[:m, 0], 0.2)
 
-        w, err_train, err_test = myfit(dataTrain[:m, 0], 0.2)
+        TrainErrors = np.append(TrainErrors, train_error)
 
-        errTrain = np.append(errTrain, err_train)
+        TestErrors = np.append(TestErrors, test_error)
 
-        errTest = np.append(errTest, err_test)
-
-    print("Train Errors : "+str(errTrain))
-    print("")
-    print("Test Errors : "+str(errTest))
-    plt.plot(M, errTrain, 'blue', label='Train Error')
-    plt.plot(M, errTest, 'red', label='Test Error')
+    plt.plot(xAxis, TrainErrors, 'blue', label='Train Error')
+    plt.plot(xAxis, TestErrors, 'red', label='Test Error')
     plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3, ncol=2, mode="expand", borderaxespad=0.)
     plt.suptitle("Question 4(f): training and test error")
     plt.ylim(0, 250)
     plt.show()
 
+    # Best fitting function
+    M = np.argmin(TestErrors)
+    S = dataTrain[:, 0][:M]
+    w, train_error, test_error = myfit(S, 0.2)
+    plotY(w, S, sigma)
+    plt.suptitle("Question 4(f): best-fitting function ({} basis functions)".format(M))
+    print("Best Fitting Function: ")
+    print("Optimal value of M = {}".format(M))
+    print("_______________________________________________________")
+    print("Optimal value of w = {}".format(w))
+    print("_______________________________________________________")
+    print("Training Error of Optimal Value of M and w :{} ".format(train_error))
+    print("_______________________________________________________")
+    print("Testing Error of Optimal Value of M and w :{} ".format(test_error))
+    print("_______________________________________________________")
+    if train_error < test_error:
+        print("Training error is indeed less than test error.  ")
+    print("_______________________________________________________")
+    plt.show()
+
 
 bestM(0.2)
 
-#print(myfit(dataTrain[0:5, 0], 0.2))
-#print(dataTrain[0:0, 0].shape)
-#print(kernelMatrix(dataTrain[0:0, 0], dataTrain[0:3, 0], 0.2))
+
 
 # Question 5
 
