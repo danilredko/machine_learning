@@ -246,7 +246,7 @@ def bestM(sigma):
         S = dataTrain[:, 0]
         plt.title('M = {}'.format(M))
         plt.subplots_adjust(wspace=0.5, hspace =1)
-        w, train_error, test_error = myfit(S[:M], 0.2)
+        w, train_error, test_error = myfit(S[:M], sigma)
         plotY(w, S[:M], sigma)
 
     plt.suptitle('Question 4 (f) Best-Fitting functions with 0-15 basis functions')
@@ -258,7 +258,7 @@ def bestM(sigma):
 
     for m in xAxis:
 
-        w, train_error, test_error = myfit(dataTrain[:m, 0], 0.2)
+        w, train_error, test_error = myfit(dataTrain[:m, 0], sigma)
 
         TrainErrors = np.append(TrainErrors, train_error)
 
@@ -274,7 +274,7 @@ def bestM(sigma):
     # Best fitting function
     M = np.argmin(TestErrors)
     S = dataTrain[:, 0][:M]
-    w, train_error, test_error = myfit(S, 0.2)
+    w, train_error, test_error = myfit(S, sigma)
     plotY(w, S, sigma)
     plt.suptitle("Question 4(f): best-fitting function ({} basis functions)".format(M))
     print("Best Fitting Function: ")
@@ -330,7 +330,7 @@ def regFit(S, sigma, alpha):
 
     validation_error = np.divide(np.power(np.subtract(tVal, Yval), 2), dataVal.shape[0])
 
-    return w , np.sum(train_error) , np.sum(validation_error)
+    return w, np.sum(train_error), np.sum(validation_error)
 
 def Q5b():
 
@@ -341,8 +341,79 @@ def Q5b():
 
 def bestAlpha(S, sigma):
 
-    alphas = np.power(10.0, np.arange(-12, 4, 1, dtype=int) )
+    #print(range(-12, 4, 1))
 
-    print(alphas)
+    #print(np.power(10.0, np.array(range(-12, 4, 1)) ))
 
-bestAlpha(dataTrain[:,0], 0.2)
+    alphas = np.power(10.0, np.arange(-12, 4, 1, dtype=int))
+
+    for M in range(0, 16):
+        plt.subplot(4, 4, M+1)
+        S = dataTrain[:, 0]
+        plt.title('alpha = {}'.format(alphas[M]))
+        plt.subplots_adjust(wspace=0.5, hspace =1)
+        w, train_error, test_error = regFit(S, sigma, alphas[M])
+        plotY(w, S, sigma)
+
+    plt.suptitle('Question 5 (c) Best-Fitting functions for log(alpha)= -12, -11,...,0,1,2,3')
+    plt.show()
+
+
+    TrainErrors = np.array([])
+    ValidationErrors = np.array([])
+    xAxis = range(16)
+
+    for m in xAxis:
+
+        w, train_error, validation_error = regFit(dataTrain[:, 0], sigma , alphas[m])
+
+        TrainErrors = np.append(TrainErrors, train_error)
+
+        ValidationErrors = np.append(ValidationErrors, validation_error)
+
+    print(TrainErrors)
+    print(ValidationErrors)
+    plt.semilogx(alphas, TrainErrors, 'blue', label='Train Error')
+    plt.semilogx(alphas, ValidationErrors, 'red', label='Validation Error')
+    plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3, ncol=2, mode="expand", borderaxespad=0.)
+    plt.ylabel("error")
+    plt.xlabel("alpha")
+    plt.suptitle("Question 5(c): training and validation error")
+    plt.show()
+
+    # Best fitting function
+    i = np.argmin(ValidationErrors)
+    S = dataTrain[:, 0]
+    w, train_error, validation_error = regFit(S, sigma, alphas[i])
+    plotY(w, S, sigma)
+    plt.suptitle("Question 5(c): best-fitting function (alpha = {})".format(alphas[i]))
+    plt.show()
+    print("Best Fitting Function: ")
+    print("Optimal value of alpha = {}".format(alphas[i]))
+    print("_______________________________________________________")
+    print("Optimal value of w = {}".format(w))
+    print("_______________________________________________________")
+    print("Training Error of Optimal Value of alpha and w :{} ".format(train_error))
+    print("_______________________________________________________")
+    print("Validation Error of Optimal Value of alpha and w :{} ".format(validation_error))
+    print("_______________________________________________________")
+
+    # Getting Test Error
+    tTest = dataTest[:, 1]
+    Xtest = dataTest[:, 0]
+    K_test = kernelMatrix(Xtest, S, sigma)
+    Y_test = K_test.dot(w)
+    test_error = np.divide(np.power(np.subtract(tTest, Y_test), 2), dataTest.shape[0])
+    test_error = np.sum(test_error)
+
+    print("Testing Error of Optimal Value of alpha and w : {} ".format(test_error))
+    print("_______________________________________________________")
+
+    print("_______________________________________________________")
+    if train_error < validation_error < test_error:
+        print("The errors are indeed training error < validation error < test error ")
+    print("_______________________________________________________")
+    plt.show()
+
+
+bestAlpha( dataTrain[:,0], 0.2)
