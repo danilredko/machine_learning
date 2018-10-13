@@ -416,4 +416,123 @@ def bestAlpha(S, sigma):
     plt.show()
 
 
-bestAlpha( dataTrain[:,0], 0.2)
+#bestAlpha(dataTrain[:, 0], 0.2)
+
+
+# Question 6
+
+
+# Question 6 a)
+
+def q6a():
+
+    np.random.shuffle(dataVal)
+    plt.scatter(dataVal[:, 0], dataVal[:, 1])
+    plt.suptitle("Question 6(a): Training data for Question 6")
+    plt.xlabel(" x ")
+    plt.ylabel(" y ")
+    plt.show()
+
+
+
+
+#q6a()
+
+
+def cross_val(K, S, sigma, alpha, X, Y):
+
+
+    X_k_fold = np.split(X, K)
+    Y_k_fold = np.array_split(Y, K)
+    print(Y_k_fold)
+    #print(np.delete(Y_k_fold, 1, axis=0))
+    trainErrors = np.array([])
+    valErrors = np.array([])
+
+    for i in range(0, K):
+
+        tVal = Y_k_fold[i]
+
+        xVal = X_k_fold[i]
+
+        tTrain = np.delete(Y_k_fold, i, axis=0)
+
+        tTrain = tTrain.reshape(tTrain.size)
+
+        print(tTrain)
+
+        xTrain = np.delete(X_k_fold, i, axis=0)
+
+        xTrain = xTrain.reshape(xTrain.size)
+
+        K_train = kernelMatrix(xTrain, S, sigma)
+
+        ridge = lin.Ridge(alpha)
+
+        ridge.fit(K_train, tTrain)
+
+        w = ridge.coef_
+
+        w[0] = ridge.intercept_
+
+        Ytrain = K_train.dot(w)
+
+        train_error = np.divide(np.power(np.subtract(tTrain, Ytrain), 2), tTrain.shape[0])
+
+        trainErrors = np.append(trainErrors, np.sum(train_error))
+
+        K_val = kernelMatrix(xVal, S, sigma)
+
+        Yval = K_val.dot(w)
+
+        validation_error = np.divide(np.power(np.subtract(tVal, Yval), 2), xVal.shape[0])
+
+        valErrors = np.append(valErrors, np.sum(validation_error))
+
+    return trainErrors, valErrors
+
+
+def q6c():
+
+    trainErros, valErrors = cross_val(5, dataTrain[:, 0][:10], 0.2, 1.0, dataVal[:, 0], dataVal[:, 1])
+
+    x = np.linspace(1, 5, 5)
+
+    plt.plot(x, trainErros, 'b', label='Training Errors')
+    plt.plot(x, valErrors, 'r', label='Validation Errors')
+    plt.xlabel('fold')
+    plt.ylabel('error')
+    plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3, ncol=2, mode="expand", borderaxespad=0.)
+    plt.suptitle("Question 6(c): training and validation errors during cross validation")
+    plt.show()
+    print("Mean of training Errors: {}".format(np.mean(trainErros)))
+    print("Mean of Validation Errors: {}".format(np.mean(valErrors)))
+    if np.mean(valErrors) > np.mean(trainErros):
+        print("Mean Validation Error is indeed greater than the mean training error")
+
+#q6c()
+
+def bestAlphaCV(K, S, sigma, X , Y):
+
+    alphas = np.power(10.0, np.arange(-11, 5, 1, dtype=int))
+
+    TrainErrors = np.array([])
+    valErrors = np.array([])
+
+    for i in range(0, 16):
+
+        trainErr, ValErr = cross_val(K, S, sigma, alphas[i], X, Y)
+        TrainErrors = np.append(TrainErrors, np.mean(trainErr))
+        valErrors = np.append(valErrors, np.mean(ValErr))
+
+    plt.semilogx(alphas, TrainErrors, 'b', label='Training Error')
+    plt.semilogx(alphas, valErrors, 'r', label='Validation Error')
+    plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3, ncol=2, mode="expand", borderaxespad=0.)
+    plt.suptitle("Question 6(d): training and validation error")
+    plt.xlabel("alpha")
+    plt.ylabel("error")
+    plt.show()
+
+bestAlphaCV(5, dataTrain[:, 0][:15], 0.2, dataVal[:, 0], dataVal[:, 1])
+
+
