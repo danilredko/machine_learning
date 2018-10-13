@@ -444,8 +444,7 @@ def cross_val(K, S, sigma, alpha, X, Y):
 
     X_k_fold = np.split(X, K)
     Y_k_fold = np.array_split(Y, K)
-    print(Y_k_fold)
-    #print(np.delete(Y_k_fold, 1, axis=0))
+
     trainErrors = np.array([])
     valErrors = np.array([])
 
@@ -458,8 +457,6 @@ def cross_val(K, S, sigma, alpha, X, Y):
         tTrain = np.delete(Y_k_fold, i, axis=0)
 
         tTrain = tTrain.reshape(tTrain.size)
-
-        print(tTrain)
 
         xTrain = np.delete(X_k_fold, i, axis=0)
 
@@ -532,6 +529,49 @@ def bestAlphaCV(K, S, sigma, X , Y):
     plt.xlabel("alpha")
     plt.ylabel("error")
     plt.show()
+
+
+    index_of_best_alpha = np.argmin(valErrors)
+
+    best_aplha = alphas[index_of_best_alpha]
+
+    print("Optimal value of alpha: {}".format(best_aplha))
+
+    tTrain = Y
+    xTrain = X
+
+    K_train = kernelMatrix(xTrain, S, sigma)
+
+    ridge = lin.Ridge(best_aplha)
+
+    ridge.fit(K_train, tTrain)
+
+    w = ridge.coef_
+
+    Ytrain = K_train.dot(w)
+
+    train_error = np.sum(np.divide(np.power(np.subtract(tTrain, Ytrain), 2), tTrain.shape[0]))
+
+    tTest = dataTest[:, 1]
+    Xtest = dataTest[:, 0]
+    K_test = kernelMatrix(Xtest, S, sigma)
+
+    Y_test = K_test.dot(w)
+
+    test_error = np.sum(np.divide(np.power(np.subtract(tTest, Y_test), 2), dataTest.shape[0]))
+
+
+    print("Optimal value of w: {}".format(w))
+
+    print("Testing Error: {}".format(test_error))
+
+    print("Training Error: {}".format(train_error))
+
+    print("Mean Validation Error: {}".format(np.mean(valErrors)))
+
+
+
+
 
 bestAlphaCV(5, dataTrain[:, 0][:15], 0.2, dataVal[:, 0], dataVal[:, 1])
 
