@@ -135,7 +135,6 @@ print("-----------------------------------------------------------------------")
 with open('data1.pickle','rb') as f:
     dataTrain, dataTest = pickle.load(f)
 
-
 # Question 4a)
 
 def K_n(X, S, sigma):
@@ -330,6 +329,8 @@ def regFit(S, sigma, alpha):
 
     validation_error = np.divide(np.power(np.subtract(tVal, Yval), 2), dataVal.shape[0])
 
+    print("w_0: "+str(w[0]))
+
     return w, np.sum(train_error), np.sum(validation_error)
 
 def Q5b():
@@ -371,8 +372,6 @@ def bestAlpha(S, sigma):
 
         ValidationErrors = np.append(ValidationErrors, validation_error)
 
-    print(TrainErrors)
-    print(ValidationErrors)
     plt.semilogx(alphas, TrainErrors, 'blue', label='Train Error')
     plt.semilogx(alphas, ValidationErrors, 'red', label='Validation Error')
     plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3, ncol=2, mode="expand", borderaxespad=0.)
@@ -415,7 +414,7 @@ def bestAlpha(S, sigma):
     print("_______________________________________________________")
     plt.show()
 
-
+#Q5b()
 #bestAlpha(dataTrain[:, 0], 0.2)
 
 
@@ -530,7 +529,6 @@ def bestAlphaCV(K, S, sigma, X , Y):
     plt.ylabel("error")
     plt.show()
 
-
     index_of_best_alpha = np.argmin(valErrors)
 
     best_aplha = alphas[index_of_best_alpha]
@@ -560,7 +558,6 @@ def bestAlphaCV(K, S, sigma, X , Y):
 
     test_error = np.sum(np.divide(np.power(np.subtract(tTest, Y_test), 2), dataTest.shape[0]))
 
-
     print("Optimal value of w: {}".format(w))
 
     print("Testing Error: {}".format(test_error))
@@ -570,9 +567,80 @@ def bestAlphaCV(K, S, sigma, X , Y):
     print("Mean Validation Error: {}".format(np.mean(valErrors)))
 
 
+#bestAlphaCV(5, dataTrain[:, 0][:15], 0.2, dataVal[:, 0], dataVal[:, 1])
 
 
+# Question 7
 
-bestAlphaCV(5, dataTrain[:, 0][:15], 0.2, dataVal[:, 0], dataVal[:, 1])
 
+def fitRegGD(S, sigma, alpha, lrate):
+
+    w = np.random.randn(16)
+
+    print(w)
+
+    w_1 = w[1:]
+
+    w_0 = w[0]
+
+
+    for i in range(0, 100000):
+
+        #two_alpha_w_1 = np.add(np.dot(alpha, w_1), np.dot(alpha, w_1))
+
+        #w_1 = np.subtract(w_1, np.dot(lrate, np.add(der_of_loss(w_1, S, sigma), two_alpha_w_1)))
+
+        two_alpha_w_0 = np.add(np.dot(alpha, w_0), np.dot(alpha, w_0))
+
+        w_0 = np.subtract(w_0, np.dot(lrate, np.add(der_of_loss(w_0, S, sigma), two_alpha_w_0)))
+
+    print(w_1)
+
+    w2, test_error, val_error = regFit(S, sigma, alpha)
+
+    print(w2)
+
+
+def der_of_loss(w, S, sigma):
+
+    X = dataTrain[:, 0]
+
+    t = dataTrain[:, 1]
+
+    #print(t.shape)
+
+    K = kernelMatrix(X, S, sigma)
+
+    #K = K[:, 1:]
+
+    #print(w.shape)
+
+    Y = K.dot(w)
+
+    #print(Y.shape)
+
+    K_w_t = np.subtract(Y, t)
+
+    Two_K_ = np.add(np.transpose(K), np.transpose(K))
+
+    train_error = np.sum(np.divide(np.power(np.subtract(t, Y), 2), t.shape[0]))
+
+    tTest = dataTest[:, 1]
+    Xtest = dataTest[:, 0]
+
+    K_test = kernelMatrix(Xtest, S, sigma)
+
+    #K_test = K_test[:, 1:]
+
+    Y_test = K_test.dot(w)
+    test_error = np.sum(np.divide(np.power(np.subtract(tTest, Y_test), 2), dataTest.shape[0]))
+
+    print("Training error: "+str(train_error))
+
+    print("Test Error: "+str(test_error))
+
+    return np.dot(Two_K_, K_w_t)
+
+
+fitRegGD(dataTrain[:, 0], 0.2, 0.01, 0.01)
 
