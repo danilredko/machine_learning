@@ -577,24 +577,21 @@ def fitRegGD(S, sigma, alpha, lrate):
 
     w = np.random.randn(16)
 
-    print(w)
-
-    w_1 = w[1:]
-
-    w_0 = w[0]
-
-
     for i in range(0, 100000):
 
-        #two_alpha_w_1 = np.add(np.dot(alpha, w_1), np.dot(alpha, w_1))
+        w_1 = w[1:]
 
-        #w_1 = np.subtract(w_1, np.dot(lrate, np.add(der_of_loss(w_1, S, sigma), two_alpha_w_1)))
+        w_0 = w[0]
 
-        two_alpha_w_0 = np.add(np.dot(alpha, w_0), np.dot(alpha, w_0))
+        two_alpha_w_1 = np.add(np.dot(alpha, w_1), np.dot(alpha, w_1))
 
-        w_0 = np.subtract(w_0, np.dot(lrate, np.add(der_of_loss(w_0, S, sigma), two_alpha_w_0)))
+        w_1 = np.subtract(w_1, np.dot(lrate, np.add(der_of_loss(w, S, sigma)[1:], two_alpha_w_1)))
 
-    print(w_1)
+        w_0 = np.subtract(w_0, np.dot(lrate, der_of_loss(w, S, sigma)[0]))
+
+        w = np.insert(w_1, 0, w_0)
+
+    print(w)
 
     w2, test_error, val_error = regFit(S, sigma, alpha)
 
@@ -607,17 +604,9 @@ def der_of_loss(w, S, sigma):
 
     t = dataTrain[:, 1]
 
-    #print(t.shape)
-
     K = kernelMatrix(X, S, sigma)
 
-    #K = K[:, 1:]
-
-    #print(w.shape)
-
     Y = K.dot(w)
-
-    #print(Y.shape)
 
     K_w_t = np.subtract(Y, t)
 
@@ -629,8 +618,6 @@ def der_of_loss(w, S, sigma):
     Xtest = dataTest[:, 0]
 
     K_test = kernelMatrix(Xtest, S, sigma)
-
-    #K_test = K_test[:, 1:]
 
     Y_test = K_test.dot(w)
     test_error = np.sum(np.divide(np.power(np.subtract(tTest, Y_test), 2), dataTest.shape[0]))
