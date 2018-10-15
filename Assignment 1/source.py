@@ -240,28 +240,27 @@ def q4e():
 
 def bestM(sigma):
 
+
+    TrainErrors = np.array([])
+    TestErrors = np.array([])
+
     for M in range(0, 16):
         plt.subplot(4, 4, M+1)
         S = dataTrain[:, 0]
         plt.title('M = {}'.format(M))
         plt.subplots_adjust(wspace=0.5, hspace =1)
         w, train_error, test_error = myfit(S[:M], sigma)
+
+        TrainErrors = np.append(TrainErrors, train_error)
+
+        TestErrors = np.append(TestErrors, test_error)
+
         plotY(w, S[:M], sigma)
 
     plt.suptitle('Question 4 (f) Best-Fitting functions with 0-15 basis functions')
     plt.show()
 
-    TrainErrors = np.array([])
-    TestErrors = np.array([])
     xAxis = range(16)
-
-    for m in xAxis:
-
-        w, train_error, test_error = myfit(dataTrain[:m, 0], sigma)
-
-        TrainErrors = np.append(TrainErrors, train_error)
-
-        TestErrors = np.append(TestErrors, test_error)
 
     plt.plot(xAxis, TrainErrors, 'blue', label='Train Error')
     plt.plot(xAxis, TestErrors, 'red', label='Test Error')
