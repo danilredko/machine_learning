@@ -11,7 +11,6 @@ import sklearn.linear_model as lin
 
 #Question 1
 
-
 print ("\n\nQuestion 1")
 print ("-----------------------------------------------------")
 
@@ -120,10 +119,10 @@ def mymeasure(N):
 
 print("-----------------------------------------------------------------------")
 print("Question 2 c) N=200")
-#mymeasure(200)
+mymeasure(200)
 print("-----------------------------------------------------------------------")
 print("Question 2 c) N=2000")
-#mymeasure(2000)
+mymeasure(2000)
 print("-----------------------------------------------------------------------")
 
 
@@ -174,7 +173,7 @@ def plotBasis(S, sigma):
     plt.plot(x, K)
     plt.show()
 
-#plotBasis(dataTrain[:, 0][:5], sigma=0.2)
+plotBasis(dataTrain[:, 0][:5], sigma=0.2)
 
 # Question 4 c)
 
@@ -290,7 +289,7 @@ def bestM(sigma):
     plt.show()
 
 print("-----------------------------------------------------------------------")
-#bestM(0.2)
+bestM(0.2)
 
 
 # Question 5
@@ -336,7 +335,7 @@ def regFit(S, sigma, alpha):
 def Q5b():
 
     w, train_error, validation_error = regFit(dataTrain[:, 0], 0.2, 1)
-    plotY(w,dataTrain[:, 0], 0.2)
+    plotY(w, dataTrain[:, 0], 0.2)
     plt.suptitle("Question 5(b): the fitted function (alpha=1)")
     plt.show()
 
@@ -407,7 +406,7 @@ def bestAlpha(S, sigma):
     plt.show()
 
 #Q5b()
-#bestAlpha(dataTrain[:, 0], 0.2)
+bestAlpha(dataTrain[:, 0], 0.2)
 
 
 # Question 6
@@ -425,17 +424,14 @@ def q6a():
     plt.ylabel(" y ")
     plt.show()
 
-
-
-
-#q6a()
+q6a()
 
 
 def cross_val(K, S, sigma, alpha, X, Y):
 
 
-    X_k_fold = np.split(X, K)
-    Y_k_fold = np.array_split(Y, K)
+    X_k_fold = np.array(np.split(X, K))
+    Y_k_fold = np.array(np.array_split(Y, K))
 
     trainErrors = np.array([])
     valErrors = np.array([])
@@ -447,6 +443,7 @@ def cross_val(K, S, sigma, alpha, X, Y):
         xVal = X_k_fold[i]
 
         tTrain = np.delete(Y_k_fold, i, axis=0)
+
 
         tTrain = tTrain.reshape(tTrain.size)
 
@@ -480,10 +477,9 @@ def cross_val(K, S, sigma, alpha, X, Y):
 
     return trainErrors, valErrors
 
-
 def q6c():
 
-    trainErros, valErrors = cross_val(5, dataTrain[:, 0][:10], 0.2, 1.0, dataVal[:, 0], dataVal[:, 1])
+    trainErros, valErrors = cross_val(5, dataVal[:, 0][:10], 0.2, 1.0, dataVal[:, 0], dataVal[:, 1])
 
     x = np.linspace(1, 5, 5)
 
@@ -499,7 +495,7 @@ def q6c():
     if np.mean(valErrors) > np.mean(trainErros):
         print("Mean Validation Error is indeed greater than the mean training error")
 
-#q6c()
+q6c()
 
 def bestAlphaCV(K, S, sigma, X , Y):
 
@@ -511,7 +507,7 @@ def bestAlphaCV(K, S, sigma, X , Y):
     for i in range(0, 16):
 
         trainErr, ValErr = cross_val(K, S, sigma, alphas[i], X, Y)
-        TrainErrors = np.append(TrainErrors, np.mean(trainErr))
+        TrainErrors = np.append(TrainErrors, np.mean((trainErr)))
         valErrors = np.append(valErrors, np.mean(ValErr))
 
     plt.semilogx(alphas, TrainErrors, 'b', label='Training Error')
@@ -539,7 +535,20 @@ def bestAlphaCV(K, S, sigma, X , Y):
 
     w = ridge.coef_
 
+    w[0]=ridge.intercept_
+
     Ytrain = K_train.dot(w)
+
+    x = np.linspace(0, 1, 1000)
+    plt.xlabel('x')
+    plt.ylabel('t')
+    K = kernelMatrix(x, S, sigma)
+    Y = K.dot(w)
+    plt.scatter(dataVal[:, 0], dataVal[:, 1])
+    plt.plot(x, Y,'r')
+    plt.ylim(-15,15)
+    plt.suptitle("Question 6(d): best-fitting function alpha={}".format(best_aplha))
+    plt.show()
 
     train_error = np.sum(np.divide(np.power(np.subtract(tTrain, Ytrain), 2), tTrain.shape[0]))
 
@@ -553,14 +562,14 @@ def bestAlphaCV(K, S, sigma, X , Y):
 
     print("Optimal value of w: {}".format(w))
 
-    print("Testing Error: {}".format(test_error))
+    print("Testing Error: {}".format(np.mean(test_error)))
 
     print("Training Error: {}".format(train_error))
 
     print("Mean Validation Error: {}".format(np.mean(valErrors)))
 
 
-#bestAlphaCV(5, dataTrain[:, 0][:15], 0.2, dataVal[:, 0], dataVal[:, 1])
+bestAlphaCV(5, dataVal[:, 0][:15], 0.2, dataVal[:, 0], dataVal[:, 1])
 
 
 # Question 7
@@ -689,6 +698,5 @@ def fitRegGD(S, sigma, alpha, lrate):
     print("Learning Rate: {}".format(lrate))
     print('')
     print("Value of alpha: {}".format(alpha))
-
 
 fitRegGD(dataTrain[:, 0], 0.2, 0.01, 0.01)
