@@ -8,9 +8,10 @@ import matplotlib.pyplot as plt
 import numpy.linalg as linalg
 import sys
 import sklearn.linear_model as lin
+
 #Question 1
 
-"""
+
 print ("\n\nQuestion 1")
 print ("-----------------------------------------------------")
 
@@ -79,7 +80,6 @@ print(np.dot(np.transpose(A), x))
 print ("-----------------------------------------------------")
 
 
-
 #Question 2
 print("-----------------------------------------------------------------------")
 print("Question 2 a)")
@@ -120,17 +120,17 @@ def mymeasure(N):
 
 print("-----------------------------------------------------------------------")
 print("Question 2 c) N=200")
-mymeasure(200)
+#mymeasure(200)
 print("-----------------------------------------------------------------------")
 print("Question 2 c) N=2000")
-mymeasure(2000)
+#mymeasure(2000)
 print("-----------------------------------------------------------------------")
-"""
 
 
 # Question 4
 
-
+print("-----------------------------------------------------------------------")
+print("Question 4")
 
 with open('data1.pickle','rb') as f:
     dataTrain, dataTest = pickle.load(f)
@@ -290,11 +290,14 @@ def bestM(sigma):
     print("_______________________________________________________")
     plt.show()
 
-
+print("-----------------------------------------------------------------------")
 #bestM(0.2)
 
 
 # Question 5
+
+
+print("Question 5")
 
 with open('data2.pickle','rb') as f:
     dataVal, dataTest = pickle.load(f)
@@ -329,8 +332,6 @@ def regFit(S, sigma, alpha):
 
     validation_error = np.divide(np.power(np.subtract(tVal, Yval), 2), dataVal.shape[0])
 
-    print("w_0: "+str(w[0]))
-
     return w, np.sum(train_error), np.sum(validation_error)
 
 def Q5b():
@@ -342,35 +343,27 @@ def Q5b():
 
 def bestAlpha(S, sigma):
 
-    #print(range(-12, 4, 1))
-
-    #print(np.power(10.0, np.array(range(-12, 4, 1)) ))
-
     alphas = np.power(10.0, np.arange(-12, 4, 1, dtype=int))
+
+    TrainErrors = np.array([])
+    ValidationErrors = np.array([])
 
     for M in range(0, 16):
         plt.subplot(4, 4, M+1)
         S = dataTrain[:, 0]
         plt.title('alpha = {}'.format(alphas[M]))
         plt.subplots_adjust(wspace=0.5, hspace =1)
-        w, train_error, test_error = regFit(S, sigma, alphas[M])
-        plotY(w, S, sigma)
-
-    plt.suptitle('Question 5 (c) Best-Fitting functions for log(alpha)= -12, -11,...,0,1,2,3')
-    plt.show()
-
-
-    TrainErrors = np.array([])
-    ValidationErrors = np.array([])
-    xAxis = range(16)
-
-    for m in xAxis:
-
-        w, train_error, validation_error = regFit(dataTrain[:, 0], sigma , alphas[m])
+        w, train_error, validation_error = regFit(S, sigma, alphas[M])
 
         TrainErrors = np.append(TrainErrors, train_error)
 
         ValidationErrors = np.append(ValidationErrors, validation_error)
+
+
+        plotY(w, S, sigma)
+
+    plt.suptitle('Question 5 (c) Best-Fitting functions for log(alpha)= -12, -11,...,0,1,2,3')
+    plt.show()
 
     plt.semilogx(alphas, TrainErrors, 'blue', label='Train Error')
     plt.semilogx(alphas, ValidationErrors, 'red', label='Validation Error')
@@ -419,7 +412,8 @@ def bestAlpha(S, sigma):
 
 
 # Question 6
-
+print("-----------------------------------------------------------------------")
+print("Question 6")
 
 # Question 6 a)
 
@@ -572,31 +566,8 @@ def bestAlphaCV(K, S, sigma, X , Y):
 
 # Question 7
 
-
-def fitRegGD(S, sigma, alpha, lrate):
-
-    w = np.random.randn(16)
-
-    for i in range(0, 100000):
-
-        w_1 = w[1:]
-
-        w_0 = w[0]
-
-        two_alpha_w_1 = np.add(np.dot(alpha, w_1), np.dot(alpha, w_1))
-
-        w_1 = np.subtract(w_1, np.dot(lrate, np.add(der_of_loss(w, S, sigma)[1:], two_alpha_w_1)))
-
-        w_0 = np.subtract(w_0, np.dot(lrate, der_of_loss(w, S, sigma)[0]))
-
-        w = np.insert(w_1, 0, w_0)
-
-    print(w)
-
-    w2, test_error, val_error = regFit(S, sigma, alpha)
-
-    print(w2)
-
+print("-----------------------------------------------------------------------")
+print("Question 7")
 
 def der_of_loss(w, S, sigma):
 
@@ -622,12 +593,103 @@ def der_of_loss(w, S, sigma):
     Y_test = K_test.dot(w)
     test_error = np.sum(np.divide(np.power(np.subtract(tTest, Y_test), 2), dataTest.shape[0]))
 
-    print("Training error: "+str(train_error))
+    return (np.dot(Two_K_, K_w_t), train_error, test_error)
 
-    print("Test Error: "+str(test_error))
 
-    return np.dot(Two_K_, K_w_t)
+def fitRegGD(S, sigma, alpha, lrate):
+
+    w = np.random.randn(16)
+
+    fours = np.power(4, range(0, 9))
+    counter = 1
+
+    TrainErrors = np.array([])
+    TestErrors = np.array([])
+
+    for i in range(0, 100000):
+
+        w_1 = w[1:]
+
+        w_0 = w[0]
+
+        two_alpha_w_1 = np.add(np.dot(alpha, w_1), np.dot(alpha, w_1))
+
+        term_1, train_error, test_error = der_of_loss(w, S, sigma)
+
+        TrainErrors = np.append(TrainErrors, train_error)
+        TestErrors = np.append(TestErrors, test_error)
+
+        w_1 = np.subtract(w_1, np.dot(lrate, np.add(term_1[1:], two_alpha_w_1)))
+
+        term_0, train_error, test_error = der_of_loss(w, S, sigma)
+
+        w_0 = np.subtract(w_0, np.dot(lrate, term_0[0]))
+
+        w = np.insert(w_1, 0, w_0)
+
+        if i in fours:
+            plt.subplot(3, 3, counter)
+            plt.title("$4^{}$ iterations".format(counter-1))
+            counter += 1
+            plt.subplots_adjust(wspace=0.5, hspace=1)
+            plotY(w, S, sigma)
+
+    plt.suptitle("Question 7: fitted function as iterations increase")
+    plt.show()
+
+    # Q7 fitted function
+    plotY(w, S, sigma)
+    plt.suptitle("Question 7: fitted function")
+    plt.show()
+
+    # Plot of Testing and Training Errors
+
+    x = np.arange(100000)
+
+    plt.plot(x, TrainErrors, 'b', label='Training Error')
+    plt.plot(x, TestErrors, 'r', label='Testing Error')
+    plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3, ncol=2, mode="expand", borderaxespad=0.)
+    plt.ylabel('error')
+    plt.xlabel('iterations')
+    plt.suptitle("Question 7: training and test error v.s. iterations")
+    plt.show()
+
+    # Test and Train Error log Scale
+
+    plt.semilogx(x, TrainErrors, 'b', label='Training Error')
+    plt.semilogx(x, TestErrors, 'r', label='Testing Error')
+    plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3, ncol=2, mode="expand", borderaxespad=0.)
+    plt.ylabel('error')
+    plt.xlabel('iterations')
+    plt.suptitle("Question 7: training and test error v.s. iterations (log scale)")
+    plt.show()
+
+    # last 10000 training errors
+
+    x = np.arange(10000)
+
+    plt.plot(x, TrainErrors[-10000:], 'b')
+    plt.ylabel('error')
+    plt.xlabel('x')
+    plt.suptitle("Question 7: last 10000 training errors")
+    plt.show()
+
+
+    print('')
+    print("Optimal w:{} ".format(w))
+    print("")
+    print("Training error: "+str(TrainErrors[-1]))
+    print("")
+    print("Test Error: "+str(TestErrors[-1]))
+    w2, test_error, val_error = regFit(S, sigma, alpha)
+    print('')
+    print("w2: {}".format(w2))
+    print('')
+    print("Manitude of the difference: {}".format(np.sum(np.square(np.subtract(w, w2)))))
+    print('')
+    print("Learning Rate: {}".format(lrate))
+    print('')
+    print("Value of alpha: {}".format(alpha))
 
 
 fitRegGD(dataTrain[:, 0], 0.2, 0.01, 0.01)
-
