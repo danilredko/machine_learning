@@ -80,14 +80,15 @@ print("")
 print("Accuracy: {}".format(mean_accuracy))
 
 print("")
-print("Qestion 2 c)")
+print("Question 2 c)")
 print("")
+
 
 def q2c(X, t):
 
     plt.scatter(X[:, [0]], X[:, [1]], s=2, c=np.where(t == 0.0, 'r', 'b'))
     x = np.linspace(-5, 5, 50)
-    plt.plot(x, np.add(np.dot(weights[1].T, x), w_0), 'black')
+    plt.plot(x, np.add(np.dot(weights[1].T, x), w_0), 'k')
     plt.suptitle("Question 2(c): training data and decision boundary")
     plt.show()
 
@@ -95,17 +96,63 @@ def q2c(X, t):
 
 # Question 2 d)
 
-print(" Question 2 d)")
+print("Question 2 d)")
 
 def q2d(X, t):
 
     thres = np.arange(-3, 4)
+    colors = np.where(thres > 0, 'b', 'red')
+    colors[np.argwhere(thres == 0).reshape(1)[0]] = 'k'
+    x = np.linspace(-5, 5, 10)
+    for i in range(7):
+        plt.plot(x, np.add(np.dot(weights[1].T, x), w_0-thres[i]), c=colors[i])
+    plt.scatter(X[:, [0]], X[:, [1]], s=2, c=np.where(t == 0.0, 'r', 'b'))
+    plt.suptitle("Question 2(d): decision boundaries for seven thresholds")
+    plt.show()
 
-    print(thres)
-
-q2d(X, t)
+#q2d(X, t)
 
 
+
+# Question 2 g)
+
+X, t = genData(mu0, mu1, Sigma0, Sigma1, 10)
+
+# Question 2 h)
+
+plt.scatter(X[:, [0]], X[:, [1]], s=2, c=np.where(t == 0.0, 'r', 'b'))
+x = np.linspace(-5, 5, 10)
+plt.plot(x, np.add(np.dot(weights[1].T, x), w_0-1), c='k')
+plt.show()
+
+print(t)
+predictions = logisticReg.predict(X)
+print(predictions)
+
+predicted_positives = np.count_nonzero(predictions)
+
+predicted_negatives = len(predictions) - predicted_positives
+
+class_1_index = np.argwhere(t == 1).reshape(-1)
+true_positives = np.equal(t[class_1_index], predictions[class_1_index]).sum()
+false_positives = (len(t[class_1_index]) - true_positives)
+
+
+class_0_index = np.argwhere(t == 0).reshape(-1)
+true_negatives = np.equal(t[class_0_index], predictions[class_0_index]).sum()
+false_negatives = (len(t[class_0_index]) - true_negatives)
+
+recall = true_positives / (true_positives+false_negatives)
+
+precision = true_positives / (true_positives+false_positives)
+
+
+print("Predicted Positives: {}".format(predicted_positives))
+print("Predicted Negatives: {}".format(predicted_negatives))
+print("True Positives: {}".format(true_positives))
+print("False Positives: {}".format())
+print("True Negatives: {}".format(true_negatives))
+print("False Negatives: {}".format(false_negatives))
 
 
 
