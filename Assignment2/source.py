@@ -2,7 +2,7 @@ import numpy as np
 import sklearn as sklrn
 import sklearn.linear_model as lmodel
 import matplotlib.pyplot as plt
-
+from sklearn.metrics import precision_recall_curve
 
 
 print("Question 1")
@@ -106,28 +106,22 @@ def q2d(X, t):
     x = np.linspace(-5, 5, 10)
     for i in range(7):
         plt.plot(x, np.add(np.dot(weights[1].T, x), w_0-thres[i]), c=colors[i])
+
     plt.scatter(X[:, [0]], X[:, [1]], s=2, c=np.where(t == 0.0, 'r', 'b'))
     plt.suptitle("Question 2(d): decision boundaries for seven thresholds")
     plt.show()
 
-#q2d(X, t)
+q2d(X, t)
 
 
 
 # Question 2 g)
 
-X, t = genData(mu0, mu1, Sigma0, Sigma1, 10)
+X, t = genData(mu0, mu1, Sigma0, Sigma1, 10000)
 
 # Question 2 h)
 
-plt.scatter(X[:, [0]], X[:, [1]], s=2, c=np.where(t == 0.0, 'r', 'b'))
-x = np.linspace(-5, 5, 10)
-plt.plot(x, np.add(np.dot(weights[1].T, x), w_0-1), c='k')
-plt.show()
-
-print(t)
 predictions = logisticReg.predict(X)
-print(predictions)
 
 predicted_positives = np.count_nonzero(predictions)
 
@@ -142,17 +136,24 @@ class_0_index = np.argwhere(t == 0).reshape(-1)
 true_negatives = np.equal(t[class_0_index], predictions[class_0_index]).sum()
 false_negatives = (len(t[class_0_index]) - true_negatives)
 
-recall = true_positives / (true_positives+false_negatives)
+recall = float(true_positives) / (true_positives+false_negatives)
 
-precision = true_positives / (true_positives+false_positives)
+precision = float(true_positives) / (true_positives+false_positives)
 
 
 print("Predicted Positives: {}".format(predicted_positives))
 print("Predicted Negatives: {}".format(predicted_negatives))
 print("True Positives: {}".format(true_positives))
-print("False Positives: {}".format())
+print("False Positives: {}".format(false_positives))
 print("True Negatives: {}".format(true_negatives))
 print("False Negatives: {}".format(false_negatives))
+print("Recall : {}".format(recall))
+print("Precision: {}".format(precision))
+
+# Question 2 i)
 
 
-
+plt.scatter(X[:, [0]], X[:, [1]], s=2, c=np.where(t == 0.0, 'r', 'b'))
+x = np.linspace(-5, 5, 10)
+plt.plot(x, np.add(np.dot(weights[1].T, x), w_0-1), c='k')
+plt.show()
