@@ -62,7 +62,7 @@ X, t = genData(mu0, mu1, Sigma0, Sigma1, 1000)
 
 # Question 2 b)
 
-logisticReg = lmodel.LogisticRegression()
+logisticReg = lmodel.LogisticRegression(multi_class='ovr')
 
 logisticReg.fit(X, t)
 
@@ -117,9 +117,45 @@ q2d(X, t)
 
 # Question 2 g)
 
-X, t = genData(mu0, mu1, Sigma0, Sigma1, 10000)
+X, t = genData(mu0, mu1, Sigma0, Sigma1, 5)
+
 
 # Question 2 h)
+def predict1(theta, X):
+    '''Predict whether the label
+    is 0 or 1 using learned logistic
+    regression parameters '''
+    m, n = X.shape
+    p = np.zeros(shape=(m, 1))
+
+    h = sigmoid(X.dot(theta.T))
+
+    for it in range(0, h.shape[0]):
+        if h[it] > 0.5:
+            p[it, 0] = 1
+        else:
+            p[it, 0] = 0
+
+    return p
+
+
+def predict2(theta, X):
+    p_1 = sigmoid(np.dot(X, theta))
+    return p_1 > 0.5
+
+
+def sigmoid(z):
+
+    return np.divide(1, np.add(1, np.exp(np.negative(z))))
+
+
+plt.scatter(X[:, [0]], X[:, [1]], s=2, c=np.where(t == 0.0, 'r', 'b'))
+x = np.linspace(-5, 5, 10)
+plt.plot(x, np.add(np.dot(weights[1].T, x), w_0-1), c='k')
+
+print(predict1(weights, X).reshape(-1))
+print(predict2(weights, X).reshape(-1))
+
 
 predictions = logisticReg.predict(X)
 
@@ -149,11 +185,7 @@ print("True Negatives: {}".format(true_negatives))
 print("False Negatives: {}".format(false_negatives))
 print("Recall : {}".format(recall))
 print("Precision: {}".format(precision))
-
+plt.show()
 # Question 2 i)
 
 
-plt.scatter(X[:, [0]], X[:, [1]], s=2, c=np.where(t == 0.0, 'r', 'b'))
-x = np.linspace(-5, 5, 10)
-plt.plot(x, np.add(np.dot(weights[1].T, x), w_0-1), c='k')
-plt.show()
