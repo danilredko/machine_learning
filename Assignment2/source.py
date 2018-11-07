@@ -87,12 +87,14 @@ print("")
 def q2c(X, t):
 
     plt.scatter(X[:, [0]], X[:, [1]], s=2, c=np.where(t == 0.0, 'r', 'b'))
-    x = np.linspace(-5, 5, 50)
-    plt.plot(x, np.add(np.dot(weights[1].T, x), w_0), 'k')
+    x = np.linspace(-5, 6)
+    plt.plot(x, np.add(np.dot(-weights[0]/weights[1], x), (-w_0)/weights[1]), 'k')
+    plt.xlim(-5, 6)
+    plt.ylim(-5, 6)
     plt.suptitle("Question 2(c): training data and decision boundary")
     plt.show()
 
-#q2c(X, t)
+q2c(X, t)
 
 # Question 2 d)
 
@@ -103,16 +105,16 @@ def q2d(X, t):
     thres = np.arange(-3, 4)
     colors = np.where(thres > 0, 'b', 'red')
     colors[np.argwhere(thres == 0).reshape(1)[0]] = 'k'
-    x = np.linspace(-5, 5, 10)
+    x = np.linspace(-5, 6)
+    plt.xlim(-5, 6)
+    plt.ylim(-5, 6)
     for i in range(7):
-        plt.plot(x, np.add(np.dot(weights[1].T, x), w_0-thres[i]), c=colors[i])
-
+        plt.plot(x, np.add(np.dot(-weights[0]/weights[1], x), (-w_0+thres[i])/weights[1]), c=colors[i])
     plt.scatter(X[:, [0]], X[:, [1]], s=2, c=np.where(t == 0.0, 'r', 'b'))
     plt.suptitle("Question 2(d): decision boundaries for seven thresholds")
     plt.show()
 
 q2d(X, t)
-
 
 
 # Question 2 g)
@@ -121,27 +123,6 @@ X, t = genData(mu0, mu1, Sigma0, Sigma1, 5)
 
 
 # Question 2 h)
-def predict1(theta, X):
-    '''Predict whether the label
-    is 0 or 1 using learned logistic
-    regression parameters '''
-    m, n = X.shape
-    p = np.zeros(shape=(m, 1))
-
-    h = sigmoid(X.dot(theta.T))
-
-    for it in range(0, h.shape[0]):
-        if h[it] > 0.5:
-            p[it, 0] = 1
-        else:
-            p[it, 0] = 0
-
-    return p
-
-
-def predict2(theta, X):
-    p_1 = sigmoid(np.dot(X, theta))
-    return p_1 > 0.5
 
 
 def sigmoid(z):
@@ -149,15 +130,31 @@ def sigmoid(z):
     return np.divide(1, np.add(1, np.exp(np.negative(z))))
 
 
+def predict(weights, X, t):
+
+    m, n = X.shape
+    p = np.zeros(shape=(m, 1))
+
+    h = sigmoid(X.dot(weights.T))
+
+    for it in range(0, h.shape[0]):
+        if h[it] > sigmoid(t):
+            p[it, 0] = 1
+        else:
+            p[it, 0] = 0
+
+    return p
+
+
 plt.scatter(X[:, [0]], X[:, [1]], s=2, c=np.where(t == 0.0, 'r', 'b'))
-x = np.linspace(-5, 5, 10)
-plt.plot(x, np.add(np.dot(weights[1].T, x), w_0-1), c='k')
+x = np.linspace(-5, 6)
+plt.xlim(-5, 6)
+plt.ylim(-5, 6)
+plt.plot(x, np.add(np.dot(-weights[0]/weights[1], x), (-w_0+1)/ (weights[1])), c='k')
 
-print(predict1(weights, X).reshape(-1))
-print(predict2(weights, X).reshape(-1))
+predictions = predict(weights, X, 1).reshape(-1)
 
-
-predictions = logisticReg.predict(X)
+print(predictions)
 
 predicted_positives = np.count_nonzero(predictions)
 
@@ -186,6 +183,10 @@ print("False Negatives: {}".format(false_negatives))
 print("Recall : {}".format(recall))
 print("Precision: {}".format(precision))
 plt.show()
+
+
 # Question 2 i)
+
+
 
 
