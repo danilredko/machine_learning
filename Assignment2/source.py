@@ -220,3 +220,65 @@ def q2k(X, t):
     print("Area under the graph: {}".format(area))
 
 q2k(X, t)
+
+
+
+
+#q2k(X, t)
+
+
+# Question 3
+
+
+with open('../../mnist.pickle', 'rb') as f:
+    Xtrain, Ytrain, Xtest, Ytest = pickle.load(f)
+
+
+# Question 3 a
+
+
+def show36Images(X):
+
+    plt.figure()
+    for i in range(0, 36):
+        #v = X[:, i]
+        w = np.reshape(X[i], [28,28])
+        plt.subplot(6, 6, i+1)
+        plt.axis('off')
+        plt.imshow(w, cmap='Greys', interpolation='nearest')
+        plt.suptitle("Question 3(a): 16 random MNIST images")
+    plt.show()
+
+def q3a():
+
+    my_random = np.random.choice(np.arange(0, 60000, dtype=int), 36, replace=False)
+
+    show36Images(Xtrain[my_random])
+
+#q3a()
+
+def q3b():
+
+
+    clf = lmodel.LogisticRegression(multi_class='multinomial', solver='lbfgs')
+
+    clf.fit(Xtrain, Ytrain)
+
+    train_score = clf.score(Xtrain, Ytrain)
+
+    test_score = clf.score(Xtest, Ytest)
+
+
+    print('')
+    print("Train score: {} %".format(train_score*100))
+    print('')
+    print('Test score: {} %'.format(test_score*100))
+
+#q3b()
+
+def q3c():
+
+    pass
+
+
+
