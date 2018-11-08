@@ -278,7 +278,35 @@ def q3b():
 
 def q3c():
 
-    pass
+    all_accuracy = []
+
+    K = range(1, 21)
+
+    for k in K:
+
+        clf = sklrn.neighbors.KNeighborsClassifier(n_neighbors=k, algorithm='brute')
+
+        clf.fit(Xtrain, Ytrain)
+
+        test_score = clf.score(Xtest, Ytest)
+
+        all_accuracy.append(test_score*100)
+
+    all_accuracy = np.array(all_accuracy)
+
+    plt.plot(np.array(K), all_accuracy)
+    plt.suptitle("Figure 3(c): KNN test accuracy")
+    plt.show()
+
+    bestK = K[np.argmax(all_accuracy)]
+
+    print('')
+
+    print('Best K: {}'.format(bestK))
+
+q3c()
+
+
 
 
 
