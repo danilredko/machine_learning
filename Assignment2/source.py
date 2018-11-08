@@ -94,7 +94,7 @@ def q2c(X, t):
     plt.suptitle("Question 2(c): training data and decision boundary")
     plt.show()
 
-q2c(X, t)
+#q2c(X, t)
 
 # Question 2 d)
 
@@ -114,12 +114,12 @@ def q2d(X, t):
     plt.suptitle("Question 2(d): decision boundaries for seven thresholds")
     plt.show()
 
-q2d(X, t)
+#q2d(X, t)
 
 
 # Question 2 g)
 
-X, t = genData(mu0, mu1, Sigma0, Sigma1, 5)
+X, t = genData(mu0, mu1, Sigma0, Sigma1, 10)
 
 
 # Question 2 h)
@@ -132,57 +132,59 @@ def sigmoid(z):
 
 def predict(weights, X, t):
 
-    m, n = X.shape
-    p = np.zeros(shape=(m, 1))
+    p_1 = sigmoid(w_0 + weights[0]*X[:, [0]] + weights[1]*X[:, [1]]).reshape(-1)
 
-    h = sigmoid(X.dot(weights.T))
+    return (np.where(p_1 > 0.5, 1.0 ,0.0)).reshape(-1)
 
-    for it in range(0, h.shape[0]):
-        if h[it] > sigmoid(t):
-            p[it, 0] = 1
-        else:
-            p[it, 0] = 0
+def q2h(t):
 
-    return p
+    plt.scatter(X[:, [0]], X[:, [1]], s=2, c=np.where(t == 0.0, 'r', 'b'))
+    x = np.linspace(-5, 6)
+    plt.xlim(-5, 6)
+    plt.ylim(-5, 6)
+    plt.plot(x, np.add(np.dot(-weights[0]/weights[1], x), (-w_0+t)/ (weights[1])), c='k')
+
+    predictions = predict(weights, X, t).reshape(-1)
+
+    predicted_positives = np.count_nonzero(predictions)
+
+    predicted_negatives = len(predictions) - predicted_positives
+
+    class_1_index = np.argwhere(t == 1).reshape(-1)
+    true_positives = np.equal(t[class_1_index], predictions[class_1_index]).sum()
+    false_positives = (len(t[class_1_index]) - true_positives)
+
+    class_0_index = np.argwhere(t == 0).reshape(-1)
+    true_negatives = np.equal(t[class_0_index], predictions[class_0_index]).sum()
+    false_negatives = (len(t[class_0_index]) - true_negatives)
+
+    recall = float(true_positives) / (true_positives+false_negatives)
+
+    precision = float(true_positives) / (true_positives+false_positives)
+
+    print("Predicted Positives: {}".format(predicted_positives))
+    print("Predicted Negatives: {}".format(predicted_negatives))
+    print("True Positives: {}".format(true_positives))
+    print("False Positives: {}".format(false_positives))
+    print("True Negatives: {}".format(true_negatives))
+    print("False Negatives: {}".format(false_negatives))
+    print("Recall : {}".format(recall))
+    print("Precision: {}".format(precision))
+    plt.show()
+
+    return predicted_positives, predicted_negatives, true_positives, false_positives, true_negatives, false_negatives, recall, precision
 
 
-plt.scatter(X[:, [0]], X[:, [1]], s=2, c=np.where(t == 0.0, 'r', 'b'))
-x = np.linspace(-5, 6)
-plt.xlim(-5, 6)
-plt.ylim(-5, 6)
-plt.plot(x, np.add(np.dot(-weights[0]/weights[1], x), (-w_0+1)/ (weights[1])), c='k')
+PP, PN, TP, FP, TN, FN, R, P = q2h(0)
 
-predictions = predict(weights, X, 1).reshape(-1)
-
-print(predictions)
-
-predicted_positives = np.count_nonzero(predictions)
-
-predicted_negatives = len(predictions) - predicted_positives
-
-class_1_index = np.argwhere(t == 1).reshape(-1)
-true_positives = np.equal(t[class_1_index], predictions[class_1_index]).sum()
-false_positives = (len(t[class_1_index]) - true_positives)
-
-
-class_0_index = np.argwhere(t == 0).reshape(-1)
-true_negatives = np.equal(t[class_0_index], predictions[class_0_index]).sum()
-false_negatives = (len(t[class_0_index]) - true_negatives)
-
-recall = float(true_positives) / (true_positives+false_negatives)
-
-precision = float(true_positives) / (true_positives+false_positives)
-
-
-print("Predicted Positives: {}".format(predicted_positives))
-print("Predicted Negatives: {}".format(predicted_negatives))
-print("True Positives: {}".format(true_positives))
-print("False Positives: {}".format(false_positives))
-print("True Negatives: {}".format(true_negatives))
-print("False Negatives: {}".format(false_negatives))
-print("Recall : {}".format(recall))
-print("Precision: {}".format(precision))
-plt.show()
+print("Predicted Positives: {}".format(PP))
+print("Predicted Negatives: {}".format(PN))
+print("True Positives: {}".format(TP))
+print("False Positives: {}".format(FP))
+print("True Negatives: {}".format(TN))
+print("False Negatives: {}".format(FN))
+print("Recall : {}".format(R))
+print("Precision: {}".format(P))
 
 
 # Question 2 i)
