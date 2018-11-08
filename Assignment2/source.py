@@ -119,7 +119,7 @@ def q2d(X, t):
 
 # Question 2 g)
 
-X, t = genData(mu0, mu1, Sigma0, Sigma1, 10)
+X, t = genData(mu0, mu1, Sigma0, Sigma1, 10000)
 
 
 # Question 2 h)
@@ -130,65 +130,93 @@ def sigmoid(z):
     return np.divide(1, np.add(1, np.exp(np.negative(z))))
 
 
-def predict(weights, X, t):
+def predict(weights, X, threshold):
 
-    p_1 = sigmoid(w_0 + weights[0]*X[:, [0]] + weights[1]*X[:, [1]]).reshape(-1)
+    term1 = np.add(w_0, np.dot(weights[0], X[:, [0]]))
 
-    return (np.where(p_1 > 0.5, 1.0 ,0.0)).reshape(-1)
+    term2 = np.dot(weights[1], X[:, [1]])
 
-def q2h(t):
+    z = np.add(term1, term2)
+
+    p_1 = sigmoid(z)
+
+    return np.where(p_1 > sigmoid(threshold), 1.0 ,0.0)
+
+
+def q2h(threshold, X, t):
+
+    predictions = predict(weights, X, threshold)
+
+    predicted_positives = np.count_nonzero(predictions, axis=0)
+
+    predicted_negatives = len(predictions) - predicted_positives
+
+    class_1_index = np.argwhere(t == 1).reshape(-1)
+
+    true_positives = np.sum(np.ones(predictions[class_1_index, :].shape) == predictions[class_1_index, :] , axis=0)
+
+    false_positives = predicted_positives - true_positives
+
+    class_0_index = np.argwhere(t == 0).reshape(-1)
+
+    true_negatives = np.sum(np.zeros(predictions[class_0_index, :].shape) == predictions[class_0_index, :] , axis=0)
+
+    false_negatives = predicted_negatives - true_negatives
+
+    recall = np.true_divide(true_positives, (np.add(true_positives, false_negatives)))
+
+    precision = np.true_divide(true_positives, np.add(true_positives, false_positives))
+
+    return predicted_positives, predicted_negatives, true_positives, false_positives, true_negatives, false_negatives, recall, precision
+
+
+def graph(X, t, threshold):
 
     plt.scatter(X[:, [0]], X[:, [1]], s=2, c=np.where(t == 0.0, 'r', 'b'))
     x = np.linspace(-5, 6)
     plt.xlim(-5, 6)
     plt.ylim(-5, 6)
-    plt.plot(x, np.add(np.dot(-weights[0]/weights[1], x), (-w_0+t)/ (weights[1])), c='k')
+    plt.plot(x, np.add(np.dot(-weights[0]/weights[1], x), np.divide(np.add(np.negative(w_0), threshold), weights[1])), c='k')
 
-    predictions = predict(weights, X, t).reshape(-1)
-
-    predicted_positives = np.count_nonzero(predictions)
-
-    predicted_negatives = len(predictions) - predicted_positives
-
-    class_1_index = np.argwhere(t == 1).reshape(-1)
-    true_positives = np.equal(t[class_1_index], predictions[class_1_index]).sum()
-    false_positives = (len(t[class_1_index]) - true_positives)
-
-    class_0_index = np.argwhere(t == 0).reshape(-1)
-    true_negatives = np.equal(t[class_0_index], predictions[class_0_index]).sum()
-    false_negatives = (len(t[class_0_index]) - true_negatives)
-
-    recall = float(true_positives) / (true_positives+false_negatives)
-
-    precision = float(true_positives) / (true_positives+false_positives)
-
-    print("Predicted Positives: {}".format(predicted_positives))
-    print("Predicted Negatives: {}".format(predicted_negatives))
-    print("True Positives: {}".format(true_positives))
-    print("False Positives: {}".format(false_positives))
-    print("True Negatives: {}".format(true_negatives))
-    print("False Negatives: {}".format(false_negatives))
-    print("Recall : {}".format(recall))
-    print("Precision: {}".format(precision))
     plt.show()
 
-    return predicted_positives, predicted_negatives, true_positives, false_positives, true_negatives, false_negatives, recall, precision
+
+def summary(PP, PN, TP, FP, TN, FN, R, P):
+
+    print("Predicted Positives: {}".format(PP))
+    print("Predicted Negatives: {}".format(PN))
+    print("True Positives: {}".format(TP))
+    print("False Positives: {}".format(FP))
+    print("True Negatives: {}".format(TN))
+    print("False Negatives: {}".format(FN))
+    print("Recall : {}".format(R))
+    print("Precision: {}".format(P))
+    print("____________________________________________________________")
 
 
-PP, PN, TP, FP, TN, FN, R, P = q2h(0)
-
-print("Predicted Positives: {}".format(PP))
-print("Predicted Negatives: {}".format(PN))
-print("True Positives: {}".format(TP))
-print("False Positives: {}".format(FP))
-print("True Negatives: {}".format(TN))
-print("False Negatives: {}".format(FN))
-print("Recall : {}".format(R))
-print("Precision: {}".format(P))
-
+PP, PN, TP, FP, TN, FN, R, P = q2h(threshold=1, X=X, t=t)
+#summary(PP, PN, TP, FP, TN, FN, R, P)
+#graph(X, t, 1)
 
 # Question 2 i)
 
+def q2i(X, t):
 
+    thresholds = np.linspace(-3, 9, 1000)
+    PP, PN, TP, FP, TN, FN, R, P = q2h(np.array(thresholds), X, t)
+    plt.plot(R, P)
+    plt.xlabel('recall')
+    plt.ylabel('precision')
+    plt.suptitle('Question 2(i) precision/recall curve')
+    plt.show()
 
+#q2i(X, t)
 
+def q2k(X, t):
+
+    thresholds = np.linspace(-3, 9, 1000)
+    PP, PN, TP, FP, TN, FN, R, P = q2h(np.array(thresholds), X, t)
+    area = np.trapz(R, P)
+    print("Area under the graph: {}".format(area))
+
+q2k(X, t)
