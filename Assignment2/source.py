@@ -3,6 +3,7 @@ import sklearn as sklrn
 import sklearn.linear_model as lmodel
 import matplotlib.pyplot as plt
 from sklearn.metrics import precision_recall_curve
+import pickle
 
 
 print("Question 1")
@@ -219,7 +220,7 @@ def q2k(X, t):
     area = np.trapz(R, P)
     print("Area under the graph: {}".format(area))
 
-q2k(X, t)
+#q2k(X, t)
 
 
 
@@ -304,9 +305,47 @@ def q3c():
 
     print('Best K: {}'.format(bestK))
 
-q3c()
+#q3c()
 
 
 
+# Question 4
+
+def softmax1(z):
+
+    return np.divide(np.exp(z), np.sum(np.exp(z)))
 
 
+def q5a():
+
+    print("softmax1((0, 0)): {}".format(softmax1((0, 0))))
+
+    print("softmax1((1000, 0)): {}".format(softmax1((1000, 0))))
+
+    print("log(softmax1((-1000, 0))): {}".format(np.log(softmax1((-1000, 0)))))
+
+
+def softmax2(z):
+
+    logy = np.subtract(np.log(z), np.sum(np.exp(z)))
+
+    z = np.subtract(z, np.amax(z))
+
+    y = np.divide(np.exp(z), np.sum(np.exp(z)))
+
+
+
+    return np.array([y, logy])
+
+
+def q5c():
+
+    print("softmax2((0, 0)): {}".format(softmax2((0, 0))))
+
+    print("softmax2((1000, 0)): {}".format(softmax2((1000, 0))))
+
+    print("softmax2((-1000, 0)): {}".format(softmax2((-1000, 0))))
+
+#q5a()
+print("""""""""""""""""""""""""""""")
+#q5c()
