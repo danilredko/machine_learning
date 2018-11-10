@@ -120,7 +120,7 @@ def q2d(X, t):
 
 # Question 2 g)
 
-X, t = genData(mu0, mu1, Sigma0, Sigma1, 10000)
+#X, t = genData(mu0, mu1, Sigma0, Sigma1, 10000)
 
 
 # Question 2 h)
@@ -243,7 +243,7 @@ def show36Images(X):
     plt.figure()
     for i in range(0, 36):
         #v = X[:, i]
-        w = np.reshape(X[i], [28,28])
+        w = np.reshape(X[i], [28, 28])
         plt.subplot(6, 6, i+1)
         plt.axis('off')
         plt.imshow(w, cmap='Greys', interpolation='nearest')
@@ -346,10 +346,63 @@ def q5c():
 
 #q5a()
 print("""""""""""""""""""""""""""""")
-q5c()
+#q5c()
 
 
 # Question 6
+'''
+print(Ytrain[1])
+w = np.reshape(Xtrain[1], [28, 28])
+plt.imshow(w, cmap='Greys', interpolation='nearest')
+plt.show()
+'''
+
+# 1-of-K encoding
+
+#d = np.shape(Ytrain)[0]
+
+d = 15
+
+K_1 = np.zeros((d, 10))
+
+K_1[np.arange(d), Ytrain[:d]] = 1
+
+# Question 6 a)
+
+w = np.random.normal(0, 0.01, (10, d))
+
+w[:, [0]] = 0
+
+print(w)
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+'''
+clf = lmodel.LogisticRegression(multi_class='multinomial', solver='lbfgs')
+
+clf.fit(Xtrain[:d], Ytrain[:d])
+
+test_weights = clf.coef_
+
+test_bias = clf.intercept_
+
+print(test_weights.shape)
+print(test_weights[:, [100, 111, 222, 333, 444]])
+print('')
+print(test_bias.shape)
+print(test_bias)
+
+'''
