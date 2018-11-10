@@ -327,13 +327,11 @@ def q5a():
 
 def softmax2(z):
 
-    logy = np.subtract(np.log(z), np.sum(np.exp(z)))
+    z = z - np.max(z)
 
-    z = np.subtract(z, np.amax(z))
+    logy = np.subtract(z, np.log(np.sum(np.exp(z))))
 
     y = np.divide(np.exp(z), np.sum(np.exp(z)))
-
-
 
     return np.array([y, logy])
 
@@ -348,4 +346,10 @@ def q5c():
 
 #q5a()
 print("""""""""""""""""""""""""""""")
-#q5c()
+q5c()
+
+
+# Question 6
+
+
+
