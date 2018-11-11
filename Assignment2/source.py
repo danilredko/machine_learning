@@ -118,9 +118,22 @@ def q2d(X, t):
 #q2d(X, t)
 
 
+def q2e(X, t):
+
+    x = np.linspace(-5, 6)
+    plt.xlim(-5, 6)
+    plt.ylim(-5, 6)
+    plt.plot(x, np.add(np.dot(-weights[0]/weights[1], x), (-w_0-3)/weights[1]), c='k')
+    plt.scatter(X[:, [0]], X[:, [1]], s=2, c=np.where(t == 0.0, 'r', 'b'))
+    plt.suptitle("Question 2(e): t=-3 gives the greatest number of False Positives")
+    plt.show()
+
+#q2e(X, t)
+
+
 # Question 2 g)
 
-#X, t = genData(mu0, mu1, Sigma0, Sigma1, 10000)
+X, t = genData(mu0, mu1, Sigma0, Sigma1, 10000)
 
 
 # Question 2 h)
@@ -195,7 +208,7 @@ def summary(PP, PN, TP, FP, TN, FN, R, P):
     print("____________________________________________________________")
 
 
-PP, PN, TP, FP, TN, FN, R, P = q2h(threshold=1, X=X, t=t)
+#PP, PN, TP, FP, TN, FN, R, P = q2h(threshold=1, X=X, t=t)
 #summary(PP, PN, TP, FP, TN, FN, R, P)
 #graph(X, t, 1)
 
@@ -211,21 +224,34 @@ def q2i(X, t):
     plt.suptitle('Question 2(i) precision/recall curve')
     plt.show()
 
-#q2i(X, t)
+q2i(X, t)
+
+
+def area_under_graph(a, b, Y):
+
+    # The Trapezoidal Rule
+
+    Y = list(Y)
+
+    delta_x = (b-a)/float(len(Y))
+
+    total = Y[0]/2 + Y[-1]/2
+
+    total += sum(Y[1:-1])
+
+    return delta_x*total
+
 
 def q2k(X, t):
 
     thresholds = np.linspace(-3, 9, 1000)
     PP, PN, TP, FP, TN, FN, R, P = q2h(np.array(thresholds), X, t)
-    area = np.trapz(R, P)
-    print("Area under the graph: {}".format(area))
-
-#q2k(X, t)
-
-
+    print("Area under the graph :{}".format(area_under_graph(0, 1, P)))
 
 
 #q2k(X, t)
+
+
 
 
 # Question 3
@@ -360,7 +386,7 @@ plt.show()
 # 1-of-K encoding
 
 #d = np.shape(Ytrain)[0]
-
+''''
 d = 15
 
 K_1 = np.zeros((d, 10))
@@ -377,20 +403,6 @@ print(w)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-'''
 clf = lmodel.LogisticRegression(multi_class='multinomial', solver='lbfgs')
 
 clf.fit(Xtrain[:d], Ytrain[:d])
