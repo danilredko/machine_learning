@@ -444,7 +444,6 @@ def cross_val(K, S, sigma, alpha, X, Y):
 
         tTrain = np.delete(Y_k_fold, i, axis=0)
 
-
         tTrain = tTrain.reshape(tTrain.size)
 
         xTrain = np.delete(X_k_fold, i, axis=0)

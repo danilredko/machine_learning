@@ -224,7 +224,7 @@ def q2i(X, t):
     plt.suptitle('Question 2(i) precision/recall curve')
     plt.show()
 
-q2i(X, t)
+#q2i(X, t)
 
 
 def area_under_graph(a, b, Y):
@@ -383,38 +383,124 @@ plt.imshow(w, cmap='Greys', interpolation='nearest')
 plt.show()
 '''
 
+
 # 1-of-K encoding
 
-#d = np.shape(Ytrain)[0]
-''''
-d = 15
 
-K_1 = np.zeros((d, 10))
+#print(w[[10,12,14,64], :])
 
-K_1[np.arange(d), Ytrain[:d]] = 1
+def cross_entropy(T, Z):
 
-# Question 6 a)
+    Y = softmax2(Z)[1]
 
-w = np.random.normal(0, 0.01, (10, d))
-
-w[:, [0]] = 0
-
-print(w)
+    return  -np.sum(T * Y, axis=1) / 60000.0
 
 
+def predict_class(z):
+
+    return np.argmax(z, axis=1)
+
+
+def gradient(X, T, w, w_0):
+
+    Z = np.dot(X, w) + w_0
+    Y = softmax2(Z)[0]
+
+    print(Y)
+
+    w_0[:, :] = np.sum(np.subtract(Y, T), axis=0)
+
+    return np.dot(X.T, np.subtract(Y, T)) / 60000.0 , Y, w_0, Z
+
+
+def cost(T, Z):
+
+    return np.mean(cross_entropy(T, Z))
+
+
+def learning(X, lrate):
+
+    T = np.zeros((60000, 10))
+
+    T[np.arange(60000), Ytrain] = 1
+
+    w = 0.01 * np.random.randn(784, 10)
+
+    w_0 = np.zeros((1, 10))
+
+    for i in range(100):
+
+        print("Step: {}".format(i))
+
+        grad, Y, w_0, Z = gradient(X, T, w, w_0)
+
+        w = w - lrate*grad
+
+        print(cross_entropy(T, Z))
+        predicted_class = np.argmax(Y, axis=1)
+        print((Ytrain == predicted_class).sum())
+        print(" ----------------------------- ")
+
+
+learning(Xtrain, lrate=1)
+
+print("------------------------------------------------------------------------------------")
+""""
 
 clf = lmodel.LogisticRegression(multi_class='multinomial', solver='lbfgs')
 
-clf.fit(Xtrain[:d], Ytrain[:d])
+clf.fit(Xtrain, Ytrain)
 
 test_weights = clf.coef_
 
 test_bias = clf.intercept_
 
-print(test_weights.shape)
-print(test_weights[:, [100, 111, 222, 333, 444]])
-print('')
-print(test_bias.shape)
-print(test_bias)
+"""""
 
-'''
+
+# Question 7
+
+
+d = 60000
+
+K_1 = np.zeros((d, 10))
+
+K_1[np.arange(d), Ytrain] = 1
+
+np.random.shuffle(Xtrain)
+
+
+def gradient_stochastic(X, T, batchSize, i, w_0, w):
+
+    X = X[batchSize*i-batchSize: batchSize*i]
+
+    Z = np.dot(X, w) + w_0
+
+    Y = softmax2(Z)[0]
+
+
+    grad = np.dot(X.T, np.subtract(Y, T))
+
+    w_0[:, :] = np.sum(np.subtract(Y, K_1), axis=0)
+
+    predicted_class = np.argmax(Y, axis=1)
+    print((Ytrain == predicted_class).sum())
+    print(" ----------------------------- ")
+
+    return grad, w, w_0
+
+def stochastic_descent():
+
+    w = 0.01 * np.random.randn(784, 10)
+
+    w_0 = np.zeros((d, 10))
+
+    for i in range(500):
+
+        grad, w, w_0 = gradient_stochastic(Xtrain, K_1, 100, i+1, w_0, w)
+
+        w = w - 1*grad
+
+
+#stochastic_descent()
+
