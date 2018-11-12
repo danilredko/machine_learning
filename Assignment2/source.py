@@ -389,60 +389,84 @@ plt.show()
 
 #print(w[[10,12,14,64], :])
 
-def cross_entropy(T, Z):
+def cross_entropy(T, logY):
 
-    Y = softmax2(Z)[1]
-
-    return  -np.sum(T * Y, axis=1) / 60000.0
-
+    return - np.sum(np.sum((T * logY), axis=1), axis=0) / float(logY.shape[0])
 
 def predict_class(z):
 
     return np.argmax(z, axis=1)
 
-
-def gradient(X, T, w, w_0):
-
-    Z = np.dot(X, w) + w_0
-    Y = softmax2(Z)[0]
-
-    print(Y)
-
-    w_0[:, :] = np.sum(np.subtract(Y, T), axis=0)
-
-    return np.dot(X.T, np.subtract(Y, T)) / 60000.0 , Y, w_0, Z
-
-
-def cost(T, Z):
-
-    return np.mean(cross_entropy(T, Z))
-
-
-def learning(X, lrate):
+def learning(X, lrate, epoch):
 
     T = np.zeros((60000, 10))
 
     T[np.arange(60000), Ytrain] = 1
 
+    T_test = np.zeros((10000, 10))
+
+    T_test[np.arange(10000), Ytest] = 1
+
     w = 0.01 * np.random.randn(784, 10)
 
     w_0 = np.zeros((1, 10))
 
-    for i in range(100):
+    TrainLoss = []
+    TestLoss = []
 
-        print("Step: {}".format(i))
-
-        grad, Y, w_0, Z = gradient(X, T, w, w_0)
-
-        w = w - lrate*grad
-
-        print(cross_entropy(T, Z))
-        predicted_class = np.argmax(Y, axis=1)
-        print((Ytrain == predicted_class).sum())
-        print(" ----------------------------- ")
+    TrainAccuracy = []
+    TestAccuracy = []
 
 
-learning(Xtrain, lrate=1)
+    for i in range(epoch):
+
+        Z = np.dot(X, w) + w_0
+        Y = softmax2(Z)[0]
+        logY = softmax2(Z)[1]
+        grad_w = np.dot(Xtrain.T, np.subtract(Y, T)) / float(60000)
+        grad_w0 = np.sum(np.subtract(Y, T)) / float(60000)
+        w = w - lrate*grad_w
+        w_0 = w_0 - lrate*grad_w0
+
+        #Errors
+
+        train_loss = cross_entropy(T, logY)
+        TrainLoss.append(train_loss)
+        zTest = np.dot(Xtest, w) + w_0
+        yTest = softmax2(zTest)[0]
+        logYTest = softmax2(zTest)[1]
+        test_loss =cross_entropy(T_test, logYTest)
+        TestLoss.append(test_loss)
+
+        train_accuracy = ((predict_class(Z) == Ytrain).sum() / float(Ytrain.shape[0])) * 100.0
+        test_accuracy = ((predict_class(zTest) ==Ytest).sum() / float(Ytest.shape[0])) * 100.0
+
+        TrainAccuracy.append(train_accuracy)
+        TestAccuracy.append(test_accuracy)
+
+        if i % 10 == 0:
+            print('Step : {}'.format(i))
+            print('Train Loss : {}'.format(train_loss))
+            print('Test Loss: {}'.format(test_loss))
+
+
+    return TrainLoss, TestLoss, TrainAccuracy, TestAccuracy, w, w_0
+
+TrainLoss, TestLoss, TrainAccuracy, TestAccuracy,  w, w_0 = learning(Xtrain, 0.01, 1000)
+
+
+def q6e(TrainAccuracy, TestAccuracy, epoch):
+
+    epoch = np.arange(epoch)
+    plt.semilogx(epoch, TrainAccuracy, c='orange')
+    plt.semilogx(epoch, TestAccuracy, c='blue')
+    plt.ylabel('Accuracy (%)')
+    plt.xlabel('Epoch')
+    plt.suptitle("Question 6(e): training and test accuracy for batch gradient descent.")
+    plt.show()
+
+q6e(TrainLoss, TestLoss, 1000)
+
 
 print("------------------------------------------------------------------------------------")
 """"
@@ -463,43 +487,55 @@ test_bias = clf.intercept_
 
 d = 60000
 
-K_1 = np.zeros((d, 10))
 
-K_1[np.arange(d), Ytrain] = 1
 
 np.random.shuffle(Xtrain)
 
 
-def gradient_stochastic(X, T, batchSize, i, w_0, w):
+def gradient_stochastic(X, batchSize, i, w_0, w):
 
     X = X[batchSize*i-batchSize: batchSize*i]
+    #print(X.shape)
+    #print(w.shape)
+    #print(w_0.shape)
 
     Z = np.dot(X, w) + w_0
 
+    #print(Z.shape)
+
     Y = softmax2(Z)[0]
 
+    #print(Y.shape)
 
-    grad = np.dot(X.T, np.subtract(Y, T))
+    K_1 = np.zeros((batchSize, 10))
 
-    w_0[:, :] = np.sum(np.subtract(Y, K_1), axis=0)
+    K_1[np.arange(batchSize), Ytrain[:batchSize]] = 1
 
-    predicted_class = np.argmax(Y, axis=1)
-    print((Ytrain == predicted_class).sum())
-    print(" ----------------------------- ")
+    grad = np.dot(X.T, np.subtract(Y, K_1))
 
-    return grad, w, w_0
+    w_0 = np.sum(np.subtract(Y, K_1), axis=0)
+
+    #predicted_class = np.argmax(Y, axis=1)
+    #print((Ytrain == predicted_class).sum())
+    #print(" ----------------------------- ")
+
+    return grad/batchSize, w, w_0
 
 def stochastic_descent():
 
     w = 0.01 * np.random.randn(784, 10)
 
-    w_0 = np.zeros((d, 10))
+    w_0 = np.zeros((1, 10))
 
     for i in range(500):
 
-        grad, w, w_0 = gradient_stochastic(Xtrain, K_1, 100, i+1, w_0, w)
+        print("Step : {}".format(i))
 
-        w = w - 1*grad
+        grad, w, w_0 = gradient_stochastic(Xtrain, 1000, i+1, w_0, w)
+
+        w = w - 0.01*grad
+
+        w_0 = w_0
 
 
 #stochastic_descent()
