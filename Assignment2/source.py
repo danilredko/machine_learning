@@ -48,7 +48,7 @@ def q1c(X, t):
 
     return 0
 
-#q1c(X, t)
+q1c(X, t)
 
 print("Question 2")
 print('')
@@ -95,7 +95,7 @@ def q2c(X, t):
     plt.suptitle("Question 2(c): training data and decision boundary")
     plt.show()
 
-#q2c(X, t)
+q2c(X, t)
 
 # Question 2 d)
 
@@ -115,7 +115,7 @@ def q2d(X, t):
     plt.suptitle("Question 2(d): decision boundaries for seven thresholds")
     plt.show()
 
-#q2d(X, t)
+q2d(X, t)
 
 
 def q2e(X, t):
@@ -128,7 +128,7 @@ def q2e(X, t):
     plt.suptitle("Question 2(e): t=-3 gives the greatest number of False Positives")
     plt.show()
 
-#q2e(X, t)
+q2e(X, t)
 
 
 # Question 2 g)
@@ -208,9 +208,9 @@ def summary(PP, PN, TP, FP, TN, FN, R, P):
     print("____________________________________________________________")
 
 
-#PP, PN, TP, FP, TN, FN, R, P = q2h(threshold=1, X=X, t=t)
-#summary(PP, PN, TP, FP, TN, FN, R, P)
-#graph(X, t, 1)
+PP, PN, TP, FP, TN, FN, R, P = q2h(threshold=1, X=X, t=t)
+summary(PP, PN, TP, FP, TN, FN, R, P)
+graph(X, t, 1)
 
 # Question 2 i)
 
@@ -224,7 +224,7 @@ def q2i(X, t):
     plt.suptitle('Question 2(i) precision/recall curve')
     plt.show()
 
-#q2i(X, t)
+q2i(X, t)
 
 
 def area_under_graph(a, b, Y):
@@ -249,9 +249,11 @@ def q2k(X, t):
     print("Area under the graph :{}".format(area_under_graph(0, 1, P)))
 
 
-#q2k(X, t)
+q2k(X, t)
 
 
+
+print("Question 3: ")
 
 
 # Question 3
@@ -268,7 +270,6 @@ def show36Images(X):
 
     plt.figure()
     for i in range(0, 36):
-        #v = X[:, i]
         w = np.reshape(X[i], [28, 28])
         plt.subplot(6, 6, i+1)
         plt.axis('off')
@@ -276,16 +277,17 @@ def show36Images(X):
         plt.suptitle("Question 3(a): 16 random MNIST images")
     plt.show()
 
+
 def q3a():
 
     my_random = np.random.choice(np.arange(0, 60000, dtype=int), 36, replace=False)
 
     show36Images(Xtrain[my_random])
 
-#q3a()
+q3a()
+
 
 def q3b():
-
 
     clf = lmodel.LogisticRegression(multi_class='multinomial', solver='lbfgs')
 
@@ -295,13 +297,13 @@ def q3b():
 
     test_score = clf.score(Xtest, Ytest)
 
-
+    print('Question 3 b')
     print('')
     print("Train score: {} %".format(train_score*100))
     print('')
     print('Test score: {} %'.format(test_score*100))
 
-#q3b()
+q3b()
 
 def q3c():
 
@@ -327,15 +329,14 @@ def q3c():
 
     bestK = K[np.argmax(all_accuracy)]
 
-    print('')
+    print('Question 3c:')
 
     print('Best K: {}'.format(bestK))
 
-#q3c()
+q3c()
 
-
-
-# Question 4
+print("Question 5: ")
+# Question 5
 
 def softmax1(z):
 
@@ -369,24 +370,14 @@ def q5c():
 
     print("softmax2((-1000, 0)): {}".format(softmax2((-1000, 0))))
 
-#q5a()
+q5a()
 print("""""""""""""""""""""""""""""")
-#q5c()
+q5c()
 
 
 # Question 6
-'''
-print(Ytrain[1])
-w = np.reshape(Xtrain[1], [28, 28])
-plt.imshow(w, cmap='Greys', interpolation='nearest')
-plt.show()
-'''
+print("Question 6")
 
-
-# 1-of-K encoding
-
-
-#print(w[[10,12,14,64], :])
 
 def cross_entropy(T, logY):
 
@@ -453,6 +444,7 @@ def learning(X, lrate, epoch):
             TrainAccuracy.append(train_accuracy)
             TestAccuracy.append(test_accuracy)
 
+            """
             print("______________________________________________________")
             print('Step : {}'.format(i))
             print('Train Loss : {}'.format(train_loss))
@@ -460,7 +452,7 @@ def learning(X, lrate, epoch):
             print("")
             print("Train Accuracy : {}".format(train_accuracy))
             print("Test Accuracy : {}".format(test_accuracy))
-
+            """
     print("------------------------------------------------------------------------")
     print("Final Train Accuracy: {}".format(TrainAccuracy[-1]))
     print("Final Test Accuracy: {}".format(TestAccuracy[-1]))
@@ -470,7 +462,7 @@ def learning(X, lrate, epoch):
 
     return np.array(TrainLoss), np.array(TestLoss), np.array(TrainAccuracy), np.array(TestAccuracy), w, w_0, np.array(epoches)
 
-TrainLoss, TestLoss, TrainAccuracy, TestAccuracy,  w, w_0, epoches = learning(Xtrain, 0.1, 5000)
+#TrainLoss, TestLoss, TrainAccuracy, TestAccuracy,  w, w_0, epoches = learning(Xtrain, 0.1, 5000)
 
 
 def q6e(TrA, TestA, ep):
