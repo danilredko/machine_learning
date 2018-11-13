@@ -359,8 +359,7 @@ def softmax2(z):
 
     y = np.divide(np.exp(z), np.sum(np.exp(z)))
 
-    return np.array([y, logy])
-
+    return [y, logy]
 
 def q5c():
 
@@ -391,11 +390,12 @@ plt.show()
 
 def cross_entropy(T, logY):
 
-    return - np.sum(np.sum((T * logY), axis=1), axis=0) / float(logY.shape[0])
+    return - np.sum(np.sum((T * logY), axis=0)) / float(logY.shape[0])
 
-def predict_class(z):
+def predict_class(y):
 
-    return np.argmax(z, axis=1)
+    return np.argmax(y, axis=1)
+
 
 def learning(X, lrate, epoch):
 
@@ -417,126 +417,113 @@ def learning(X, lrate, epoch):
     TrainAccuracy = []
     TestAccuracy = []
 
+    epoches = []
+
 
     for i in range(epoch):
 
-        Z = np.dot(X, w) + w_0
-        Y = softmax2(Z)[0]
-        logY = softmax2(Z)[1]
+        Z = np.dot(Xtrain, w) + w_0
+        sm = np.apply_along_axis(softmax2, 1, Z)
+        logY = sm[:, 1]
+        Y = sm[:, 0]
         grad_w = np.dot(Xtrain.T, np.subtract(Y, T)) / float(60000)
         grad_w0 = np.sum(np.subtract(Y, T)) / float(60000)
         w = w - lrate*grad_w
         w_0 = w_0 - lrate*grad_w0
 
-        #Errors
-
-        train_loss = cross_entropy(T, logY)
-        TrainLoss.append(train_loss)
-        zTest = np.dot(Xtest, w) + w_0
-        yTest = softmax2(zTest)[0]
-        logYTest = softmax2(zTest)[1]
-        test_loss =cross_entropy(T_test, logYTest)
-        TestLoss.append(test_loss)
-
-        train_accuracy = ((predict_class(Z) == Ytrain).sum() / float(Ytrain.shape[0])) * 100.0
-        test_accuracy = ((predict_class(zTest) ==Ytest).sum() / float(Ytest.shape[0])) * 100.0
-
-        TrainAccuracy.append(train_accuracy)
-        TestAccuracy.append(test_accuracy)
+        # Errors
 
         if i % 10 == 0:
+
+            epoches.append(i)
+
+            train_loss = cross_entropy(T, logY)
+            TrainLoss.append(train_loss)
+            zTest = np.dot(Xtest, w) + w_0
+
+            sm = np.apply_along_axis(softmax2, 1, zTest)
+            logYTest = sm[:, 1]
+            yTest = sm[:, 0]
+            test_loss = cross_entropy(T_test, logYTest)
+            TestLoss.append(test_loss)
+
+            train_accuracy = ((predict_class(Y) == Ytrain).sum() / float(Ytrain.shape[0])) * 100.0
+            test_accuracy = ((predict_class(yTest) == Ytest).sum() / float(Ytest.shape[0])) * 100.0
+
+            TrainAccuracy.append(train_accuracy)
+            TestAccuracy.append(test_accuracy)
+
+            print("______________________________________________________")
             print('Step : {}'.format(i))
             print('Train Loss : {}'.format(train_loss))
             print('Test Loss: {}'.format(test_loss))
+            print("")
+            print("Train Accuracy : {}".format(train_accuracy))
+            print("Test Accuracy : {}".format(test_accuracy))
+
+    print("------------------------------------------------------------------------")
+    print("Final Train Accuracy: {}".format(TrainAccuracy[-1]))
+    print("Final Test Accuracy: {}".format(TestAccuracy[-1]))
+    print("------------------------------------------------------------------------")
+    print('Final Train Loss: {}'.format(TrainLoss[-1]))
+    print('Final Test Loss: {}'.format(TestLoss[-1]))
+
+    return np.array(TrainLoss), np.array(TestLoss), np.array(TrainAccuracy), np.array(TestAccuracy), w, w_0, np.array(epoches)
+
+TrainLoss, TestLoss, TrainAccuracy, TestAccuracy,  w, w_0, epoches = learning(Xtrain, 0.1, 5000)
 
 
-    return TrainLoss, TestLoss, TrainAccuracy, TestAccuracy, w, w_0
+def q6e(TrA, TestA, ep):
 
-TrainLoss, TestLoss, TrainAccuracy, TestAccuracy,  w, w_0 = learning(Xtrain, 0.01, 1000)
-
-
-def q6e(TrainAccuracy, TestAccuracy, epoch):
-
-    epoch = np.arange(epoch)
-    plt.semilogx(epoch, TrainAccuracy, c='orange')
-    plt.semilogx(epoch, TestAccuracy, c='blue')
+    plt.semilogx(ep, TrA, c='orange')
+    plt.semilogx(ep, TestA, c='blue')
     plt.ylabel('Accuracy (%)')
     plt.xlabel('Epoch')
-    plt.suptitle("Question 6(e): training and test accuracy for batch gradient descent.")
+    plt.suptitle("Question 6(e): training and test accuracy for batch gradient descent")
     plt.show()
 
-q6e(TrainLoss, TestLoss, 1000)
+
+
+def q6f(TrL, TestL, ep):
+
+    plt.semilogx(ep, TrL, c='orange')
+    plt.semilogx(ep, TestL, c='blue')
+    plt.ylabel('Loss')
+    plt.xlabel('Epoch')
+    plt.suptitle("Question 6(f): training and test loss for batch gradient descent")
+    plt.show()
+
+
+def q6g(TrA, ep):
+
+    TrA = TrA[-200:]
+    ep = ep[-200:]
+
+    plt.semilogx(ep, TrA, c='blue')
+    plt.ylabel('Accuracy (%)')
+    plt.xlabel('Epoch')
+    plt.suptitle("Question 6(g): training accuracy for last 200 epochs of bgd")
+    plt.show()
+
+
+def q6h(TrL, ep):
+
+    TrL = TrL[-200:]
+    ep = ep[-200:]
+
+    plt.semilogx(ep, TrL, c='blue')
+    plt.ylabel('Loss')
+    plt.xlabel('Epoch')
+    plt.suptitle("Question 6(h): training loss for last 200 epochs of bgd")
+    plt.show()
 
 
 print("------------------------------------------------------------------------------------")
-""""
 
-clf = lmodel.LogisticRegression(multi_class='multinomial', solver='lbfgs')
+q6e(TrainAccuracy, TestAccuracy, epoches)
+q6f(TrainLoss, TestLoss, epoches)
+q6g(TrainAccuracy, epoches)
+q6h(TrainLoss, epoches)
 
-clf.fit(Xtrain, Ytrain)
-
-test_weights = clf.coef_
-
-test_bias = clf.intercept_
-
-"""""
-
-
-# Question 7
-
-
-d = 60000
-
-
-
-np.random.shuffle(Xtrain)
-
-
-def gradient_stochastic(X, batchSize, i, w_0, w):
-
-    X = X[batchSize*i-batchSize: batchSize*i]
-    #print(X.shape)
-    #print(w.shape)
-    #print(w_0.shape)
-
-    Z = np.dot(X, w) + w_0
-
-    #print(Z.shape)
-
-    Y = softmax2(Z)[0]
-
-    #print(Y.shape)
-
-    K_1 = np.zeros((batchSize, 10))
-
-    K_1[np.arange(batchSize), Ytrain[:batchSize]] = 1
-
-    grad = np.dot(X.T, np.subtract(Y, K_1))
-
-    w_0 = np.sum(np.subtract(Y, K_1), axis=0)
-
-    #predicted_class = np.argmax(Y, axis=1)
-    #print((Ytrain == predicted_class).sum())
-    #print(" ----------------------------- ")
-
-    return grad/batchSize, w, w_0
-
-def stochastic_descent():
-
-    w = 0.01 * np.random.randn(784, 10)
-
-    w_0 = np.zeros((1, 10))
-
-    for i in range(500):
-
-        print("Step : {}".format(i))
-
-        grad, w, w_0 = gradient_stochastic(Xtrain, 1000, i+1, w_0, w)
-
-        w = w - 0.01*grad
-
-        w_0 = w_0
-
-
-#stochastic_descent()
+print("------------------------------------------------------------------------------------")
 
