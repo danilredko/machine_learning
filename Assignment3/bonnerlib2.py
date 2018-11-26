@@ -40,8 +40,6 @@ def dfContour(clf):
     ax.contour(xx, yy, Z, levels=[0.5], colors='k', linestyles='solid')
     
     
-        
-
 
 # Plot the decision function of classifier clf in 3D.
 # if Cflag=1 (the default), draw a contour plot of the decision function

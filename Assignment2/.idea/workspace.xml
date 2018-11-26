@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="66a811c1-dd90-4fb5-b524-2f8a5ce75b59" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Assignment3/bonnerlib2.py" afterPath="$PROJECT_DIR$/../Assignment3/bonnerlib2.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../Assignment3/source.py" afterPath="$PROJECT_DIR$/../Assignment3/source.py" />
     </list>
     <ignored path="CSC411Assignment2.iws" />
     <ignored path=".idea/workspace.xml" />
