@@ -2,7 +2,7 @@ import numpy as np
 import sklearn as skl
 from sklearn.neural_network import MLPClassifier
 import matplotlib.pyplot as plt
-
+import numpy.random as rnd
 from bonnerlib2 import dfContour
 print("Question 1")
 print('')
@@ -182,10 +182,12 @@ def q3_set_up():
     W = w_d[1]
     w0 = w0_d[1]
 
-    return DATA[0], V, v0, W, w0, output_2.reshape(-1)
+    return DATA, V, v0, W, w0, output_2.reshape(-1)
 
 
 def forward(X, V, v0, W, w0):
+
+
 
     U = np.dot(X, V) + v0
 
@@ -201,31 +203,51 @@ def forward(X, V, v0, W, w0):
 def diff_of_outputs():
 
     X, V, v0, W, w0, output2 = q3_set_up()
-    output1 = forward(X, V, v0, W, w0)[3].reshape(-1)
+    output1 = forward(X[0], V, v0, W, w0)[3].reshape(-1)
     print("The difference between outputs: {}".format(np.sum(np.square(output2 - output1))))
 
-diff_of_outputs()
+#diff_of_outputs()
 
 
-def gradient(H, O, T, Z, U):
+def gradient(H, O, T, U, X, Z, W):
 
-    DW = np.dot(H.T, O - T)
+    O = O.reshape(-1)
+    T = T.reshape(-1)
+
+    DW = np.dot(np.transpose(H), O - T)
     dw0 = np.sum(O-T, axis=0)
+    DV = np.dot(X.T, U)
+    dv0 = np.sum(np.dot(Z, W.T)*(1-np.power(H, 2)), axis=0)
+
+    return DW, dw0, DV, dv0
+
+
+def loss(O, T):
+
+    O = O.reshape(-1)
+    T = T.reshape(-1)
+
+    return -np.sum(-T*np.log(O)-(1-T)*np.log(1-O), axis=0) / float(T.shape[0])
+
+
+DATA, V, v0, W, w0, output2 = q3_set_up()
+Xtrain = DATA[0]
+tTrain= DATA[1]
+Xtest = DATA[2]
+tTest = DATA[3]
+
+#input dimensions
+Ntrain, I = np.shape(Xtrain)
+Ntest, I = np.shape(Xtest)
+K = np.max(tTrain)+1
 
 
 
 
-
-
-
-
-
-
-
-
-
-
+'''
 def bgd(J, K, lrate):
+
+
 
 
     '''
@@ -235,3 +257,6 @@ def bgd(J, K, lrate):
     '''
 
     sigma = 0.01
+    W = sigma*rnd.randn()
+    pass
+
