@@ -187,8 +187,6 @@ def q3_set_up():
 
 def forward(X, V, v0, W, w0):
 
-
-
     U = np.dot(X, V) + v0
 
     H = np.tanh(U)
@@ -197,13 +195,13 @@ def forward(X, V, v0, W, w0):
 
     O = sigmoid(Z)
 
-    return [U, H, Z, O]
+    return U, H, Z, O
 
 
 def diff_of_outputs():
 
     X, V, v0, W, w0, output2 = q3_set_up()
-    output1 = forward(X[0], V, v0, W, w0)[3].reshape(-1)
+    output1 = forward(X[0], V, v0, W, w0)[3].reshape(-1) # FIX THIS
     print("The difference between outputs: {}".format(np.sum(np.square(output2 - output1))))
 
 #diff_of_outputs()
@@ -214,12 +212,12 @@ def gradient(H, O, T, U, X, Z, W):
     O = O.reshape(-1)
     T = T.reshape(-1)
 
-    DW = np.dot(np.transpose(H), O - T)
-    dw0 = np.sum(O-T, axis=0)
-    DV = np.dot(X.T, U)
-    dv0 = np.sum(np.dot(Z, W.T)*(1-np.power(H, 2)), axis=0)
+    DW = np.dot(np.transpose(H), O - T) / float(X.shape[0])
+    dw0 = np.sum(O-T, axis=0)/ float(X.shape[0])
+    DV = np.dot(X.T, U)/ float(X.shape[0])
+    dv0 = np.sum(np.dot(Z, W.T)*(1-np.power(H, 2)), axis=0)/ float(X.shape[0])
 
-    return DW, dw0, DV, dv0
+    return DW.reshape(3, 1), dw0, DV, dv0
 
 
 def loss(O, T):
@@ -227,28 +225,13 @@ def loss(O, T):
     O = O.reshape(-1)
     T = T.reshape(-1)
 
-    return -np.sum(-T*np.log(O)-(1-T)*np.log(1-O), axis=0) / float(T.shape[0])
+    return np.sum(-T*np.log(O)-(1-T)*np.log(1-O), axis=0) / float(T.shape[0])
 
 
-DATA, V, v0, W, w0, output2 = q3_set_up()
-Xtrain = DATA[0]
-tTrain= DATA[1]
-Xtest = DATA[2]
-tTest = DATA[3]
-
-#input dimensions
-Ntrain, I = np.shape(Xtrain)
-Ntest, I = np.shape(Xtest)
-K = np.max(tTrain)+1
+DATA = generateData(10000, 10000)
 
 
-
-
-'''
 def bgd(J, K, lrate):
-
-
-
 
     '''
     J is the number of units in the hidden layer
@@ -256,7 +239,52 @@ def bgd(J, K, lrate):
     lrate is the learning rate
     '''
 
-    sigma = 0.01
-    W = sigma*rnd.randn()
-    pass
+    Xtrain = DATA[0]
+    yTrain= DATA[1]
+    Xtest = DATA[2]
+    yTest = DATA[3]
 
+
+
+    #input dimension
+
+    '''
+    Ntrain, I = np.shape(Xtrain)
+    Ntest, I = np.shape(Xtest)
+    K = int(np.max(yTrain)+1)
+
+    Ttrain = np.zeros([Ntrain, K])
+    Ttest = np.zeros([Ntest, K])
+    Ttrain[range(Ntrain), yTrain] = 1
+    Ttest[range(Ntest), yTest] = 1
+    '''
+    sigma = 1.0
+    W = sigma*rnd.randn(3, 1)
+    w0 = 0.0
+
+    V = sigma*rnd.randn(2, 3)
+    v0 = np.zeros((3, ))
+
+
+    lossTrainList = []
+    accTrainList = []
+    accTestList = []
+
+    for i in range(1, K+1):
+
+        U, H, Z, O = forward(Xtrain, V, v0, W, w0)
+
+        DW, dw0, DV, dv0 = gradient(H, O, yTrain, U, Xtrain, Z, W)
+
+        W = W - lrate*DW
+        w0 = w0 - lrate*dw0
+
+        V = V - lrate*DV
+        v0 = v0 - lrate*dv0
+
+        if i % 10 == 0:
+            print("Step : {}".format(i))
+            print(loss(O, yTrain))
+
+
+bgd(3, 1000, 0.01)
