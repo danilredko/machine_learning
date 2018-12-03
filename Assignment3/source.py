@@ -110,10 +110,10 @@ def q1_3_by_3_graphs(hidden_units, question_letter, Xtrain, tTrain, Xtest, tTest
     return models[bestNN], weights[bestNN][0], weights[bestNN][1], np.array(accuracies), np.array(predic_prob[bestNN])
 
 
-DATA = generateData(1000, 10000)
+#DATA = generateData(1000, 10000)
 
 #bestNN_c, w0_c, w_c, acc_c, predic_prob_c = q1_3_by_3_graphs(2, 'c', DATA[0], DATA[1], DATA[2], DATA[3])
-bestNN_d, w0_d, w_d, acc_d, predic_prob_d = q1_3_by_3_graphs(3, 'd', DATA[0], DATA[1], DATA[2], DATA[3])
+#bestNN_d, w0_d, w_d, acc_d, predic_prob_d = q1_3_by_3_graphs(3, 'd', DATA[0], DATA[1], DATA[2], DATA[3])
 #bestNN_e, w0_e, w_e, acc_e, predic_prob_e = q1_3_by_3_graphs(4, 'e', DATA[0], DATA[1], DATA[2], DATA[3])
 
 
@@ -155,7 +155,7 @@ def precision_recall_curve(tTest, predic_prob):
     plt.show()
 
 
-precision_recall_curve(DATA[1], predic_prob_d)
+#precision_recall_curve(DATA[1], predic_prob_d)
 
 
 
@@ -188,8 +188,11 @@ def q3_set_up():
 def forward(X, V, v0, W, w0):
 
     U = np.dot(X, V) + v0
+
     H = np.tanh(U)
+
     Z = np.dot(H, W) + w0
+
     O = sigmoid(Z)
 
     return [U, H, Z, O]
@@ -201,7 +204,25 @@ def diff_of_outputs():
     output1 = forward(X, V, v0, W, w0)[3].reshape(-1)
     print("The difference between outputs: {}".format(np.sum(np.square(output2 - output1))))
 
-#diff_of_outputs()
+diff_of_outputs()
+
+
+def gradient(H, O, T, Z, U):
+
+    DW = np.dot(H.T, O - T)
+    dw0 = np.sum(O-T, axis=0)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 def bgd(J, K, lrate):
