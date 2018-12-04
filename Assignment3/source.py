@@ -212,10 +212,12 @@ def gradient(H, O, T, U, X, Z, W):
     O = O.reshape(-1)
     T = T.reshape(-1)
 
-    DW = np.dot(np.transpose(H), O - T) / float(X.shape[0])
-    dw0 = np.sum(O-T, axis=0)/ float(X.shape[0])
-    DV = np.dot(X.T, U)/ float(X.shape[0])
-    dv0 = np.sum(np.dot(Z, W.T)*(1-np.power(H, 2)), axis=0)/ float(X.shape[0])
+    dZ = O-T
+    DW = (np.dot(np.transpose(H), dZ)) / float(X.shape[0])
+    dw0 = np.sum(dZ, axis=0, keepdims=True) / float(X.shape[0])
+    dU = np.dot(Z, W.T)*(1-np.power(H, 2))
+    DV = np.dot(X.T, U)/float(X.shape[0])
+    dv0 = np.sum(dU, axis=0, keepdims=True)/float(X.shape[0])
 
     return DW.reshape(3, 1), dw0, DV, dv0
 
@@ -225,11 +227,20 @@ def loss(O, T):
     O = O.reshape(-1)
     T = T.reshape(-1)
 
-    return np.sum(-T*np.log(O)-(1-T)*np.log(1-O), axis=0) / float(T.shape[0])
+    cross_ent = np.multiply(T, np.log(O)) + np.multiply((1-T), np.log(1-O))
+
+    loss = -np.sum(cross_ent) / float(T.shape[0])
+
+    return loss
 
 
 DATA = generateData(10000, 10000)
 
+def predict(X, V, v0, W, w0):
+
+    U, H, Z, O = forward(X, V, v0, W, w0)
+
+    return (O > 0.5).astype(int).reshape(X.shape[0], )
 
 def bgd(J, K, lrate):
 
@@ -241,6 +252,7 @@ def bgd(J, K, lrate):
 
     Xtrain = DATA[0]
     yTrain= DATA[1]
+
     Xtest = DATA[2]
     yTest = DATA[3]
 
@@ -269,8 +281,11 @@ def bgd(J, K, lrate):
     lossTrainList = []
     accTrainList = []
     accTestList = []
+    epoches= []
 
     for i in range(1, K+1):
+
+
 
         U, H, Z, O = forward(Xtrain, V, v0, W, w0)
 
@@ -278,13 +293,28 @@ def bgd(J, K, lrate):
 
         W = W - lrate*DW
         w0 = w0 - lrate*dw0
-
         V = V - lrate*DV
         v0 = v0 - lrate*dv0
 
         if i % 10 == 0:
             print("Step : {}".format(i))
-            print(loss(O, yTrain))
+            epoches.append(i)
+            trainloss = loss(O, yTrain)
+            lossTrainList.append(trainloss)
+            #print((predict(Xtrain, V, v0, W, w0) & yTrain.astype(int)).sum())
+    print(len(lossTrainList))
+    return np.array(lossTrainList), accTrainList, accTestList, np.array(epoches)
+
+lossTrain, accTrain, accTestList, epoches = bgd(3, 1000, .01)
 
 
-bgd(3, 1000, 0.01)
+def plot_loss(ep,lossTrain):
+
+    plt.semilogx(ep, lossTrain)
+    plt.xlabel('Epoches')
+    plt.ylabel('Loss')
+    plt.suptitle('Training Loss for bgd')
+    plt.show()
+
+
+plot_loss(epoches, lossTrain)
