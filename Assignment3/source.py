@@ -214,10 +214,10 @@ def gradient(H, O, T, U, X, Z, W):
 
     dZ = O-T
     DW = (np.dot(np.transpose(H), dZ)) / float(X.shape[0])
-    dw0 = np.sum(dZ, axis=0, keepdims=True) / float(X.shape[0])
-    dU = np.dot(Z, W.T)*(1-np.power(H, 2))
-    DV = np.dot(X.T, U)/float(X.shape[0])
-    dv0 = np.sum(dU, axis=0, keepdims=True)/float(X.shape[0])
+    dw0 = ((np.sum(dZ, axis=0)) / float(X.shape[0]))
+    dU = (np.dot(Z, W.T)*(1-np.power(H, 2)))
+    DV = ((np.dot(X.T, U))/float(X.shape[0]))
+    dv0 = ((np.sum(dU, axis=0))/float(X.shape[0]))
 
     return DW.reshape(3, 1), dw0, DV, dv0
 
@@ -227,7 +227,7 @@ def loss(O, T):
     O = O.reshape(-1)
     T = T.reshape(-1)
 
-    cross_ent = np.multiply(T, np.log(O)) + np.multiply((1-T), np.log(1-O))
+    cross_ent = T * np.log(O) + (1-T) * np.log(1-O)
 
     loss = -np.sum(cross_ent) / float(T.shape[0])
 
@@ -272,11 +272,11 @@ def bgd(J, K, lrate):
     '''
     sigma = 1.0
     W = sigma*rnd.randn(3, 1)
-    w0 = 0.0
+    #W = W.reshape(-1)
+    w0 = np.zeros((1, 1))
 
     V = sigma*rnd.randn(2, 3)
-    v0 = np.zeros((3, ))
-
+    v0 = np.zeros((1, 3))
 
     lossTrainList = []
     accTrainList = []
@@ -285,14 +285,13 @@ def bgd(J, K, lrate):
 
     for i in range(1, K+1):
 
-
-
         U, H, Z, O = forward(Xtrain, V, v0, W, w0)
 
         DW, dw0, DV, dv0 = gradient(H, O, yTrain, U, Xtrain, Z, W)
 
         W = W - lrate*DW
         w0 = w0 - lrate*dw0
+
         V = V - lrate*DV
         v0 = v0 - lrate*dv0
 
@@ -301,11 +300,17 @@ def bgd(J, K, lrate):
             epoches.append(i)
             trainloss = loss(O, yTrain)
             lossTrainList.append(trainloss)
+
+            #train_accuracy = ((predict(Xtrain, V, v0, W, w0) == yTrain).sum() / float(yTrain.shape[0])) * 100.0
+            #test_accuracy = ((predict(yTest, V, v0, W, w0) == yTest).sum() / float(yTest.shape[0])) * 100.0
+            #print("Test Accuracy: {}".format(test_accuracy))
+            #print("Train Accuracy: {}".format(train_accuracy))
             #print((predict(Xtrain, V, v0, W, w0) & yTrain.astype(int)).sum())
-    print(len(lossTrainList))
+            print("loss : {}" .format(loss(O, yTrain)))
+
     return np.array(lossTrainList), accTrainList, accTestList, np.array(epoches)
 
-lossTrain, accTrain, accTestList, epoches = bgd(3, 1000, .01)
+lossTrain, accTrain, accTestList, epoches = bgd(3, 1000, 0.0001)
 
 
 def plot_loss(ep,lossTrain):
@@ -318,3 +323,4 @@ def plot_loss(ep,lossTrain):
 
 
 plot_loss(epoches, lossTrain)
+
