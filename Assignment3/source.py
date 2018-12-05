@@ -61,7 +61,7 @@ def q1b():
 
 def q1_3_by_3_graphs(hidden_units, question_letter, Xtrain, tTrain, Xtest, tTest):
 
-    print('Question 1 ({})'.format(question_letter))
+    #print('Question 1 ({})'.format(question_letter))
     print('')
     mlp = MLPClassifier(hidden_layer_sizes=(hidden_units,), max_iter=10000,
                         tol=10e-10, solver='sgd', learning_rate_init=.01, activation='tanh')
@@ -156,25 +156,16 @@ def precision_recall_curve(tTest, predic_prob):
 
 
 #precision_recall_curve(DATA[1], predic_prob_d)
-
-
-
-
-
-print("")
-print("Question 3")
-print("")
-
-
-
+# Question 3
+#-----------------------------------------------------------------------------
 
 def sigmoid(z):
 
     return 1.0/(1.0 + np.exp(-z))
 
+
 def q3_set_up():
 
-    DATA = generateData(10000, 10000)
     nn3, w0_d, w_d, acc_d, predic_prob = q1_3_by_3_graphs(3, 'd', DATA[0], DATA[1], DATA[2], DATA[3])
     output_2 = predic_prob[:, 1]
     V = w_d[0]
@@ -182,7 +173,7 @@ def q3_set_up():
     W = w_d[1]
     w0 = w0_d[1]
 
-    return DATA, V, v0, W, w0, output_2.reshape(-1)
+    return V, v0, W, w0, output_2.reshape(-1)
 
 
 def forward(X, V, v0, W, w0):
@@ -200,11 +191,10 @@ def forward(X, V, v0, W, w0):
 
 def diff_of_outputs():
 
-    X, V, v0, W, w0, output2 = q3_set_up()
-    output1 = forward(X[0], V, v0, W, w0)[3].reshape(-1) # FIX THIS
+    V, v0, W, w0, output2 = q3_set_up()
+    U, H, Z, output1 = forward(DATA[0], V, v0, W, w0)
+    output1 = output1.reshape(-1)
     print("The difference between outputs: {}".format(np.sum(np.square(output2 - output1))))
-
-#diff_of_outputs()
 
 
 def gradient(H, O, T, U, X, Z, W):
@@ -213,7 +203,7 @@ def gradient(H, O, T, U, X, Z, W):
     T = T.reshape(-1)
 
     dZ = O-T
-    dZ=dZ.reshape(O.shape[0] ,1)
+    dZ=dZ.reshape(O.shape[0], 1)
     DW = (np.dot(np.transpose(H), dZ)) / float(X.shape[0])
     dw0 = ((np.sum(dZ, axis=0)) / float(X.shape[0]))
     dU = (np.dot(dZ, W.T)*(1-np.power(H, 2)))
@@ -252,32 +242,12 @@ def accuracy(T, O):
 
 def bgd(J, K, lrate):
 
-    '''
-    J is the number of units in the hidden layer
-    K is the number of epochs of training
-    lrate is the learning rate
-    '''
-
     Xtrain = DATA[0]
     yTrain= DATA[1]
 
     Xtest = DATA[2]
     yTest = DATA[3]
 
-
-
-    #input dimension
-
-    '''
-    Ntrain, I = np.shape(Xtrain)
-    Ntest, I = np.shape(Xtest)
-    K = int(np.max(yTrain)+1)
-
-    Ttrain = np.zeros([Ntrain, K])
-    Ttest = np.zeros([Ntest, K])
-    Ttrain[range(Ntrain), yTrain] = 1
-    Ttest[range(Ntest), yTest] = 1
-    '''
     sigma = 1.0
     W = sigma*rnd.randn(3, 1)
     w0 = np.zeros((1, 1))
@@ -303,7 +273,7 @@ def bgd(J, K, lrate):
         v0 = v0 - lrate*dv0
 
         if i % 10 == 0:
-            print("Step : {}".format(i))
+            #print("Step : {}".format(i))
             epoches.append(i)
             trainloss = loss(O, yTrain)
             lossTrainList.append(trainloss)
@@ -316,17 +286,18 @@ def bgd(J, K, lrate):
             test_accuracy = accuracy(yTest, predic_test)
 
             accTestList.append(test_accuracy)
-            print("Test Accuracy: {}".format(test_accuracy))
-            print("Train Accuracy: {}".format(train_accuracy))
+            #print("Test Accuracy: {}".format(test_accuracy))
+            #print("Train Accuracy: {}".format(train_accuracy))
 
-            print("loss : {}" .format(loss(O, yTrain)))
+            #print("loss : {}" .format(loss(O, yTrain)))
+    print("Final Test Accuracy : {}".format(accTestList[-1]))
 
     return np.array(lossTrainList), accTrainList, accTestList, epoches
 
 
 def plot_loss(ep, lossTrain, question_letter, learning_type):
 
-    plt.semilogx(ep, lossTrain)
+    plt.semilogx(ep, lossTrain, 'blue')
     plt.xlabel('Epoches')
     plt.ylabel('Loss')
     plt.suptitle('Question 3({}): Training Loss for {}'.format(question_letter, learning_type))
@@ -335,8 +306,9 @@ def plot_loss(ep, lossTrain, question_letter, learning_type):
 
 def plot_acc(ep, accTrain, accTest, question_letter, learning_type):
 
-    plt.semilogx(ep, accTrain)
-    plt.semilogx(ep, accTest)
+    plt.semilogx(ep, accTrain, 'blue', label='Train Accuracy')
+    plt.semilogx(ep, accTest, 'red', label='Test Accuracy')
+    plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3, ncol=2, mode="expand", borderaxespad=0.)
     plt.xlabel('Epoches')
     plt.ylabel('Accuracy')
     plt.suptitle('Question 3({}): training and test accuracy for {}'.format(question_letter, learning_type))
@@ -349,21 +321,9 @@ def plot_final(ec, X, title, K):
 
     ec = ec[-K:]
     X = X[-K:]
-    plt.plot(ec, X)
+    plt.plot(ec, X, 'blue')
     plt.suptitle(title)
     plt.show()
-
-DATA = generateData(10000, 10000)
-
-'''
-lossTrain, accTrainList, accTestList, epoches = bgd(3, 1000, 1)
-plot_loss(epoches, lossTrain, 'b', 'bgd')
-plot_acc(epoches, accTrainList, accTestList, 'b','bgd')
-plot_final(epoches, accTestList, 'Question 3(b): final test accuracy for bgd')
-plot_final(epoches, lossTrain, 'Question 3(b): final training loss for bgd')
-
-
-'''
 
 
 def sgd(J, K, lrate):
@@ -436,12 +396,30 @@ def sgd(J, K, lrate):
 
     print("Final Test Accuracy : {}".format(accTestList[-1]))
 
-    return np.array(lossTrainList), accTrainList, accTestList, epoches
+    return np.array(lossTrainList), accTrainList, accTestList, epoche
 
+
+'''
+print("")
+print("Question 3")
+DATA = generateData(10000, 10000)
+print("")
+print("Question 3 (a)")
+diff_of_outputs()
+print("")
+print('Question 3 (b)')
+K = 1000
+lossTrain, accTrainList, accTestList, epoches = bgd(3, K, 1)
+plot_loss(epoches, lossTrain, 'b', 'bgd')
+plot_acc(epoches, accTrainList, accTestList, 'b','bgd')
+plot_final(epoches, accTestList, 'Question 3(b): final test accuracy for bgd', K)
+plot_final(epoches, lossTrain, 'Question 3(b): final training loss for bgd', K)
+print("")
+print("Question 3(c): ")
 K = 20
-
 lossTrain, accTrainList, accTestList, epoches = sgd(3, K, 1)
 plot_acc(epoches, accTrainList, accTestList, 'c', 'sgd')
 plot_loss(epoches, lossTrain, 'c', 'sgd')
 plot_final(epoches, accTestList, 'Question 3(c): final test accuracy for sgd', K)
 plot_final(epoches, lossTrain, 'Question 3(c): final training loss for sgd', K)
+'''
