@@ -24,14 +24,17 @@ def genData(mu0, mu1, Sigma0, Sigma1, N):
     X, t = skl.utils.shuffle(X, t)
 
     return X, t
-xmin = -5
-xmax = 7
+
 
 def plotDB(w, w0):
+
+    xmin = -5
+    xmax = 7
 
     y1 = -(w0+w[0]*xmin)/w[1]
     y2 = -(w0+w[0]*xmax) /w[1]
     plt.plot([xmin, xmax], [y1, y2], linestyle='dashed', color='k', linewidth=1)
+
 
 def generateData(TrainSize, TestSize):
 
@@ -44,26 +47,25 @@ def generateData(TrainSize, TestSize):
 
     return [Xtrain, tTrain, Xtest, tTest]
 
-def q1b():
+
+def q1b(DATA):
+
+    Xtrain = DATA[0]
+    tTrain = DATA[1]
 
     mlp = MLPClassifier(hidden_layer_sizes=(1,), max_iter=10000,
                         tol=1e-10, solver='sgd', learning_rate_init=.01, activation='tanh')
 
-    #Xtrain, tTrain, Xtest, tTest = generateData()
     mlp.fit(Xtrain, tTrain)
     plt.scatter(Xtrain[:, 0], Xtrain[:, 1], s=2, color=np.where(tTrain == 0.0, 'r', 'b'))
     plt.title('Question 1(b): Neural net with 1 hidden unit.')
     dfContour(mlp)
     plt.show()
 
-#q1b()
 
+def q1_3_by_3_graphs(hidden_units, question_letter, Xtrain, tTrain, Xtest, tTest, show_graph):
 
-def q1_3_by_3_graphs(hidden_units, question_letter, Xtrain, tTrain, Xtest, tTest):
-
-    #print('Question 1 ({})'.format(question_letter))
-    print('')
-    mlp = MLPClassifier(hidden_layer_sizes=(hidden_units,), max_iter=10000,
+    mlp = MLPClassifier(hidden_layer_sizes=(hidden_units, ), max_iter=10000,
                         tol=10e-10, solver='sgd', learning_rate_init=.01, activation='tanh')
 
     accuracies = []
@@ -89,32 +91,25 @@ def q1_3_by_3_graphs(hidden_units, question_letter, Xtrain, tTrain, Xtest, tTest
         plt.scatter(Xtrain[:, 0], Xtrain[:, 1], s=2, color=np.where(tTrain == 0.0, 'r', 'b'))
         dfContour(mlp)
 
-        print('Test accuracy: {:.4%}'.format(acc))
-
-    plt.suptitle('Question 1({}): Neural net with {} hidden units.'.format(question_letter, hidden_units))
     bestNN = np.argmax(accuracies)
-    print('Best NN is a graph #{}'.format(bestNN+1))
-    plt.show()
     accuracies = np.array(accuracies)
-    print(accuracies)
-    print(bestNN)
+    #print(accuracies)
+    #print(bestNN)
     models = np.array(models)
-    print('Best NN Test accuracy: {:.4%}'.format(accuracies[bestNN]))
-    mlp.score(Xtest, tTest)
-    plt.scatter(Xtrain[:, 0], Xtrain[:, 1], s=2, color=np.where(tTrain == 0.0, 'r', 'b'))
-    dfContour(models[bestNN])
-    plt.title('Question 1({}): Best neural net with {} hidden units.'.format(question_letter, hidden_units))
-    print('')
-    plt.show()
 
-    return models[bestNN], weights[bestNN][0], weights[bestNN][1], np.array(accuracies), np.array(predic_prob[bestNN])
+    if show_graph:
 
+        plt.suptitle('Question 1({}): Neural net with {} hidden units.'.format(question_letter, hidden_units))
+        #print('Best NN is a graph #{}'.format(bestNN+1))
+        plt.show()
+        #mlp.score(Xtest, tTest)
+        plt.scatter(Xtrain[:, 0], Xtrain[:, 1], s=2, color=np.where(tTrain == 0.0, 'r', 'b'))
+        dfContour(models[bestNN])
+        plt.title('Question 1({}): Best neural net with {} hidden units.'.format(question_letter, hidden_units))
+        print('Best NN Test accuracy: {:.4%}'.format(accuracies[bestNN]))
+        plt.show()
 
-#DATA = generateData(1000, 10000)
-
-#bestNN_c, w0_c, w_c, acc_c, predic_prob_c = q1_3_by_3_graphs(2, 'c', DATA[0], DATA[1], DATA[2], DATA[3])
-#bestNN_d, w0_d, w_d, acc_d, predic_prob_d = q1_3_by_3_graphs(3, 'd', DATA[0], DATA[1], DATA[2], DATA[3])
-#bestNN_e, w0_e, w_e, acc_e, predic_prob_e = q1_3_by_3_graphs(4, 'e', DATA[0], DATA[1], DATA[2], DATA[3])
+    return models[bestNN], weights[bestNN][0], weights[bestNN][1], accuracies, np.array(predic_prob[bestNN])
 
 
 def decision_boundaries(hidden_units, question_letter, bestNN, w0, w, Xtrain, tTrain):
@@ -126,10 +121,6 @@ def decision_boundaries(hidden_units, question_letter, bestNN, w0, w, Xtrain, tT
     plt.title('Question 1({}): Decision boundaries for {} hidden units'.format(question_letter, hidden_units))
     dfContour(bestNN)
     plt.show()
-
-#decision_boundaries(3, 'g', bestNN_d, w0_d[0], w_d[0], DATA[0], DATA[1])
-#decision_boundaries(2, 'h', bestNN_c, w0_c[0], w_c[0],  DATA[0], DATA[1])
-#decision_boundaries(4, 'i', bestNN_e, w0_e[0], w_e[0],  DATA[0], DATA[1])
 
 
 def precision_recall_curve(tTest, predic_prob):
@@ -146,7 +137,10 @@ def precision_recall_curve(tTest, predic_prob):
         TP = Pos & PP
         numPP = np.sum(PP)
         numTP = np.sum(TP)
-        Precision[n] = numTP/np.float(numPP)
+        if numPP!=0:
+            Precision[n] = numTP/np.float(numPP)
+        else:
+            Precision[n] = 1
         Recall[n] = numTP/np.float(numPos)
     plt.plot(Recall, Precision)
     plt.xlabel('Recall')
@@ -154,10 +148,39 @@ def precision_recall_curve(tTest, predic_prob):
     plt.suptitle('Question 1(k): Precision/Recall curve')
     plt.show()
 
+    return Precision, Recall
 
-#precision_recall_curve(DATA[1], predic_prob_d)
+
+def auc(precision, recall):
+
+    area = 0.0
+    for m in range(1, len(recall)):
+        area += precision[m]*(recall[m-1]-recall[m])
+    return area
+
+DATA = generateData(1000, 10000)
+
+q1b(DATA)
+print('Question 1 (c)')
+bestNN_c, w0_c, w_c, acc_c, predic_prob_c = q1_3_by_3_graphs(2, 'c', DATA[0], DATA[1], DATA[2], DATA[3], show_graph=True)
+print('Question 1 (d)')
+bestNN_d, w0_d, w_d, acc_d, predic_prob_d = q1_3_by_3_graphs(3, 'd', DATA[0], DATA[1], DATA[2], DATA[3], show_graph=True)
+print('Question 1 (e)')
+bestNN_e, w0_e, w_e, acc_e, predic_prob_e = q1_3_by_3_graphs(4, 'e', DATA[0], DATA[1], DATA[2], DATA[3], show_graph=True)
+
+decision_boundaries(3, 'g', bestNN_d, w0_d[0], w_d[0], DATA[0], DATA[1])
+decision_boundaries(2, 'h', bestNN_c, w0_c[0], w_c[0],  DATA[0], DATA[1])
+decision_boundaries(4, 'i', bestNN_e, w0_e[0], w_e[0],  DATA[0], DATA[1])
+precision, recall = precision_recall_curve(DATA[1], predic_prob_d)
+print('Question 1(l)')
+area = auc(precision, recall)
+print('Area under the curve: {}'.format(area))
+print('')
+
+# -----------------------------------------------------------------------------
 # Question 3
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
+
 
 def sigmoid(z):
 
@@ -166,7 +189,7 @@ def sigmoid(z):
 
 def q3_set_up():
 
-    nn3, w0_d, w_d, acc_d, predic_prob = q1_3_by_3_graphs(3, 'd', DATA[0], DATA[1], DATA[2], DATA[3])
+    nn3, w0_d, w_d, acc_d, predic_prob = q1_3_by_3_graphs(3, 'd', DATA[0], DATA[1], DATA[2], DATA[3], show_graph=False)
     output_2 = predic_prob[:, 1]
     V = w_d[0]
     v0 = w0_d[0]
