@@ -19,8 +19,8 @@ from mpl_toolkits.mplot3d import Axes3D
 def dfContour(clf):
     ax = plt.gca()
     # The extent of xy space
-    x_min,x_max = ax.get_xlim()
-    y_min,y_max = ax.get_ylim()
+    x_min, x_max = ax.get_xlim()
+    y_min, y_max = ax.get_ylim()
      
     # form a mesh/grid over xy space
     h = 0.02    # mesh granularity
@@ -38,7 +38,31 @@ def dfContour(clf):
     
     # draw the decision boundary in solid black
     ax.contour(xx, yy, Z, levels=[0.5], colors='k', linestyles='solid')
-    
+
+
+def MYdfContour(clf):
+
+    ax = plt.gca()
+    # The extent of xy space
+    x_min, x_max = ax.get_xlim()
+    y_min, y_max = ax.get_ylim()
+
+    # form a mesh/grid over xy space
+    h = 0.02    # mesh granularity
+    xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
+                         np.arange(y_min, y_max, h))
+    mesh = np.c_[xx.ravel(), yy.ravel()]
+
+    # evaluate the decision functrion at the grid points
+    Z = clf.predict_proba(mesh)[:, 1]
+
+    # plot the contours of the decision function
+    Z = Z.reshape(xx.shape)
+    mylevels=np.linspace(0.0,1.0,11)
+    ax.contourf(xx, yy, Z, levels=mylevels, cmap=cm.RdBu, alpha=0.5)
+
+    # draw the decision boundary in solid black
+    ax.contour(xx, yy, Z, levels=[0.5], colors='k', linestyles='solid')
     
 
 # Plot the decision function of classifier clf in 3D.
