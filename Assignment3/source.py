@@ -213,10 +213,11 @@ def gradient(H, O, T, U, X, Z, W):
     T = T.reshape(-1)
 
     dZ = O-T
+    dZ=dZ.reshape(O.shape[0] ,1)
     DW = (np.dot(np.transpose(H), dZ)) / float(X.shape[0])
     dw0 = ((np.sum(dZ, axis=0)) / float(X.shape[0]))
-    dU = (np.dot(Z, W.T)*(1-np.power(H, 2)))
-    DV = ((np.dot(X.T, U))/float(X.shape[0]))
+    dU = (np.dot(dZ, W.T)*(1-np.power(H, 2)))
+    DV = ((np.dot(X.T, dU))/float(X.shape[0]))
     dv0 = ((np.sum(dU, axis=0))/float(X.shape[0]))
 
     return DW.reshape(3, 1), dw0, DV, dv0
@@ -333,7 +334,7 @@ def plot_loss(ep, lossTrain, question_letter, learning_type):
 
 
 def plot_acc(ep, accTrain, accTest, question_letter, learning_type):
-    print(len(ep))
+
     plt.semilogx(ep, accTrain)
     plt.semilogx(ep, accTest)
     plt.xlabel('Epoches')
@@ -342,23 +343,27 @@ def plot_acc(ep, accTrain, accTest, question_letter, learning_type):
     plt.show()
 
 
-def plot_acc_final(ec, X, title):
+def plot_final(ec, X, title, K):
 
-    ec = ec[-50:]
-    X = X[-50:]
+    K = int(np.floor(K/2))
+
+    ec = ec[-K:]
+    X = X[-K:]
     plt.plot(ec, X)
     plt.suptitle(title)
     plt.show()
 
-'''
-lossTrain, accTrainList, accTestList, epoches = bgd(3, 1000, 0.0001)
-plot_loss(epoches, lossTrain, 'b', 'bgd)
-plot_acc(epoches, accTrainList, accTestList, 'b','bgd)
-plot_acc_final(epoches, accTestList, 'Question 3(b): final test accuracy for bgd')
-plot_acc_final(epoches, lossTrain, 'Question 3(b): final training loss for bgd')
-'''
-
 DATA = generateData(10000, 10000)
+
+'''
+lossTrain, accTrainList, accTestList, epoches = bgd(3, 1000, 1)
+plot_loss(epoches, lossTrain, 'b', 'bgd')
+plot_acc(epoches, accTrainList, accTestList, 'b','bgd')
+plot_final(epoches, accTestList, 'Question 3(b): final test accuracy for bgd')
+plot_final(epoches, lossTrain, 'Question 3(b): final training loss for bgd')
+
+
+'''
 
 
 def sgd(J, K, lrate):
@@ -392,6 +397,7 @@ def sgd(J, K, lrate):
 
         while N1 < Ntrain:
 
+
             N2 = np.min([N1+batchSize, Ntrain])
 
             X = Xtrain[N1:N2]
@@ -410,7 +416,7 @@ def sgd(J, K, lrate):
 
         U, H, Z, O = forward(Xtrain, V, v0, W, w0)
 
-        print("Step : {}".format(i))
+        #print("Step : {}".format(i))
         epoches.append(i)
         trainloss = loss(O, yTrain)
         lossTrainList.append(trainloss)
@@ -423,15 +429,19 @@ def sgd(J, K, lrate):
         test_accuracy = accuracy(yTest, predic_test)
 
         accTestList.append(test_accuracy)
-        print("Test Accuracy: {}".format(test_accuracy))
-        print("Train Accuracy: {}".format(train_accuracy))
+        #print("Test Accuracy: {}".format(test_accuracy))
+        #print("Train Accuracy: {}".format(train_accuracy))
 
-        print("loss : {}" .format(loss(O, yTrain)))
+        #print("loss : {}" .format(loss(O, yTrain)))
+
+    print("Final Test Accuracy : {}".format(accTestList[-1]))
 
     return np.array(lossTrainList), accTrainList, accTestList, epoches
 
-lossTrain, accTrainList, accTestList, epoches = sgd(3, 20, 0.01)
-plot_loss(epoches, lossTrain, 'c', 'sgd')
+K = 20
+
+lossTrain, accTrainList, accTestList, epoches = sgd(3, K, 1)
 plot_acc(epoches, accTrainList, accTestList, 'c', 'sgd')
-plot_acc_final(epoches, accTestList, 'Question 3(c): final test accuracy for sgd')
-plot_acc_final(epoches, lossTrain, 'Question 3(c): final training loss for sgd')
+plot_loss(epoches, lossTrain, 'c', 'sgd')
+plot_final(epoches, accTestList, 'Question 3(c): final test accuracy for sgd', K)
+plot_final(epoches, lossTrain, 'Question 3(c): final training loss for sgd', K)
