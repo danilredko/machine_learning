@@ -236,11 +236,21 @@ def loss(O, T):
 
 DATA = generateData(10000, 10000)
 
+
 def predict(X, V, v0, W, w0):
 
     U, H, Z, O = forward(X, V, v0, W, w0)
 
     return (O > 0.5).astype(int).reshape(X.shape[0], )
+
+
+def accuracy(T, O):
+
+    O = O.reshape(-1)
+    T = T.reshape(-1)
+
+    return np.mean(np.equal(T, O))
+
 
 def bgd(J, K, lrate):
 
@@ -301,16 +311,22 @@ def bgd(J, K, lrate):
             trainloss = loss(O, yTrain)
             lossTrainList.append(trainloss)
 
-            #train_accuracy = ((predict(Xtrain, V, v0, W, w0) == yTrain).sum() / float(yTrain.shape[0])) * 100.0
-            #test_accuracy = ((predict(yTest, V, v0, W, w0) == yTest).sum() / float(yTest.shape[0])) * 100.0
-            #print("Test Accuracy: {}".format(test_accuracy))
-            #print("Train Accuracy: {}".format(train_accuracy))
-            #print((predict(Xtrain, V, v0, W, w0) & yTrain.astype(int)).sum())
+            predic_train = predict(Xtrain, V, v0, W, w0)
+            train_accuracy = accuracy(yTrain, predic_train)
+            accTrainList.append(train_accuracy)
+
+            predic_test = predict(Xtest, V, v0, W, w0)
+            test_accuracy = accuracy(yTest, predic_test)
+
+            accTestList.append(test_accuracy)
+            print("Test Accuracy: {}".format(test_accuracy))
+            print("Train Accuracy: {}".format(train_accuracy))
+
             print("loss : {}" .format(loss(O, yTrain)))
 
-    return np.array(lossTrainList), accTrainList, accTestList, np.array(epoches)
+    return np.array(lossTrainList), accTrainList, accTestList, epoches
 
-lossTrain, accTrain, accTestList, epoches = bgd(3, 1000, 0.0001)
+lossTrain, accTrainList, accTestList, epoches = bgd(3, 1000, 0.0001)
 
 
 def plot_loss(ep,lossTrain):
@@ -318,9 +334,19 @@ def plot_loss(ep,lossTrain):
     plt.semilogx(ep, lossTrain)
     plt.xlabel('Epoches')
     plt.ylabel('Loss')
-    plt.suptitle('Training Loss for bgd')
+    plt.suptitle('Question 3(b): Training Loss for bgd')
     plt.show()
 
 
-plot_loss(epoches, lossTrain)
+def plot_acc(ep, accTrain, accTest):
 
+    plt.semilogx(ep, accTrain)
+    plt.semilogx(ep, accTest)
+    plt.xlabel('Epoches')
+    plt.ylabel('Accuracy')
+    plt.suptitle('Question 3(b): training and test accuracy for bgd')
+    plt.show()
+
+    
+plot_loss(epoches, lossTrain)
+plot_acc(epoches, accTrainList, accTestList)
