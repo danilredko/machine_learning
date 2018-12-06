@@ -3,7 +3,7 @@ import sklearn as skl
 from sklearn.neural_network import MLPClassifier
 import matplotlib.pyplot as plt
 import numpy.random as rnd
-from bonnerlib2 import dfContour
+from bonnerlib2 import dfContour, MYdfContour
 print("Question 1")
 print('')
 
@@ -93,22 +93,18 @@ def q1_3_by_3_graphs(hidden_units, question_letter, Xtrain, tTrain, Xtest, tTest
 
     bestNN = np.argmax(accuracies)
     accuracies = np.array(accuracies)
-    #print(accuracies)
-    #print(bestNN)
     models = np.array(models)
 
     if show_graph:
 
         plt.suptitle('Question 1({}): Neural net with {} hidden units.'.format(question_letter, hidden_units))
-        #print('Best NN is a graph #{}'.format(bestNN+1))
         plt.show()
-        #mlp.score(Xtest, tTest)
         plt.scatter(Xtrain[:, 0], Xtrain[:, 1], s=2, color=np.where(tTrain == 0.0, 'r', 'b'))
         dfContour(models[bestNN])
         plt.title('Question 1({}): Best neural net with {} hidden units.'.format(question_letter, hidden_units))
         print('Best NN Test accuracy: {:.4%}'.format(accuracies[bestNN]))
         plt.show()
-
+    plt.close()
     return models[bestNN], weights[bestNN][0], weights[bestNN][1], accuracies, np.array(predic_prob[bestNN])
 
 
@@ -158,8 +154,8 @@ def auc(precision, recall):
         area += precision[m]*(recall[m-1]-recall[m])
     return area
 
+'''
 DATA = generateData(1000, 10000)
-
 q1b(DATA)
 print('Question 1 (c)')
 bestNN_c, w0_c, w_c, acc_c, predic_prob_c = q1_3_by_3_graphs(2, 'c', DATA[0], DATA[1], DATA[2], DATA[3], show_graph=True)
@@ -176,6 +172,7 @@ print('Question 1(l)')
 area = auc(precision, recall)
 print('Area under the curve: {}'.format(area))
 print('')
+'''
 
 # -----------------------------------------------------------------------------
 # Question 3
@@ -281,7 +278,7 @@ def bgd(J, K, lrate):
     lossTrainList = []
     accTrainList = []
     accTestList = []
-    epoches= []
+    epochs= []
 
     for i in range(1, K+1):
 
@@ -296,10 +293,10 @@ def bgd(J, K, lrate):
         v0 = v0 - lrate*dv0
 
         if i % 10 == 0:
-            #print("Step : {}".format(i))
-            epoches.append(i)
-            trainloss = loss(O, yTrain)
-            lossTrainList.append(trainloss)
+
+            epochs.append(i)
+            train_loss = loss(O, yTrain)
+            lossTrainList.append(train_loss)
 
             predic_train = predict(Xtrain, V, v0, W, w0)
             train_accuracy = accuracy(yTrain, predic_train)
@@ -309,13 +306,10 @@ def bgd(J, K, lrate):
             test_accuracy = accuracy(yTest, predic_test)
 
             accTestList.append(test_accuracy)
-            #print("Test Accuracy: {}".format(test_accuracy))
-            #print("Train Accuracy: {}".format(train_accuracy))
 
-            #print("loss : {}" .format(loss(O, yTrain)))
     print("Final Test Accuracy : {}".format(accTestList[-1]))
-
-    return np.array(lossTrainList), accTrainList, accTestList, epoches
+    print("Learning Rate: {}".format(lrate))
+    return np.array(lossTrainList), accTrainList, accTestList, epochs, V, v0, W, w0
 
 
 def plot_loss(ep, lossTrain, question_letter, learning_type):
@@ -341,7 +335,6 @@ def plot_acc(ep, accTrain, accTest, question_letter, learning_type):
 def plot_final(ec, X, title, K):
 
     K = int(np.floor(K/2))
-
     ec = ec[-K:]
     X = X[-K:]
     plt.plot(ec, X, 'blue')
@@ -369,7 +362,7 @@ def sgd(J, K, lrate):
     lossTrainList = []
     accTrainList = []
     accTestList = []
-    epoches= []
+    epochs= []
 
     batchSize = 50
     numEpochs = K
@@ -379,7 +372,6 @@ def sgd(J, K, lrate):
         N1 = 0
 
         while N1 < Ntrain:
-
 
             N2 = np.min([N1+batchSize, Ntrain])
 
@@ -399,10 +391,9 @@ def sgd(J, K, lrate):
 
         U, H, Z, O = forward(Xtrain, V, v0, W, w0)
 
-        #print("Step : {}".format(i))
-        epoches.append(i)
-        trainloss = loss(O, yTrain)
-        lossTrainList.append(trainloss)
+        epochs.append(i)
+        train_loss = loss(O, yTrain)
+        lossTrainList.append(train_loss)
 
         predic_train = predict(Xtrain, V, v0, W, w0)
         train_accuracy = accuracy(yTrain, predic_train)
@@ -412,37 +403,43 @@ def sgd(J, K, lrate):
         test_accuracy = accuracy(yTest, predic_test)
 
         accTestList.append(test_accuracy)
-        #print("Test Accuracy: {}".format(test_accuracy))
-        #print("Train Accuracy: {}".format(train_accuracy))
-
-        #print("loss : {}" .format(loss(O, yTrain)))
 
     print("Final Test Accuracy : {}".format(accTestList[-1]))
+    print("Learning Rate: {}".format(lrate))
+    return np.array(lossTrainList), accTrainList, accTestList, epochs, V, v0, W, w0
 
-    return np.array(lossTrainList), accTrainList, accTestList, epoche
 
+def my_decision_boundaries(w0, w, v0, V, Xtrain, tTrain, quesion_letter):
 
-'''
+    w0 = w0.reshape(-1)
+    plt.scatter(Xtrain[:, 0], Xtrain[:, 1], s=2, color=np.where(tTrain == 0.0, 'r', 'b'))
+    plt.xlim((-5, 6))
+    plt.ylim((-5, 6))
+    MYdfContour(V, v0, W, w0)
+    plt.title('Question 3({}): Decision boundary for my neural net'.format(quesion_letter))
+    plt.show()
+
 print("")
 print("Question 3")
+
 DATA = generateData(10000, 10000)
 print("")
 print("Question 3 (a)")
-diff_of_outputs()
+#diff_of_outputs()
 print("")
 print('Question 3 (b)')
 K = 1000
-lossTrain, accTrainList, accTestList, epoches = bgd(3, K, 1)
-plot_loss(epoches, lossTrain, 'b', 'bgd')
-plot_acc(epoches, accTrainList, accTestList, 'b','bgd')
-plot_final(epoches, accTestList, 'Question 3(b): final test accuracy for bgd', K)
-plot_final(epoches, lossTrain, 'Question 3(b): final training loss for bgd', K)
+lossTrain, accTrainList, accTestList, epochs, V, v0, W, w0= bgd(3, K, 1)
+plot_loss(epochs, lossTrain, 'b', 'bgd')
+plot_acc(epochs, accTrainList, accTestList, 'b','bgd')
+plot_final(epochs, accTestList, 'Question 3(b): final test accuracy for bgd', K)
+plot_final(epochs, lossTrain, 'Question 3(b): final training loss for bgd', K)
+my_decision_boundaries(w0, W, v0, V, DATA[0], DATA[1])
 print("")
 print("Question 3(c): ")
 K = 20
-lossTrain, accTrainList, accTestList, epoches = sgd(3, K, 1)
-plot_acc(epoches, accTrainList, accTestList, 'c', 'sgd')
-plot_loss(epoches, lossTrain, 'c', 'sgd')
-plot_final(epoches, accTestList, 'Question 3(c): final test accuracy for sgd', K)
-plot_final(epoches, lossTrain, 'Question 3(c): final training loss for sgd', K)
-'''
+lossTrain, accTrainList, accTestList, epochs, V, v0, W, w0 = sgd(3, K, 1)
+plot_acc(epochs, accTrainList, accTestList, 'c', 'sgd')
+plot_loss(epochs, lossTrain, 'c', 'sgd')
+plot_final(epochs, accTestList, 'Question 3(c): final test accuracy for sgd', K)
+plot_final(epochs, lossTrain, 'Question 3(c): final training loss for sgd', K)

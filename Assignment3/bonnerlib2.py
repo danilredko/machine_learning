@@ -17,6 +17,7 @@ from mpl_toolkits.mplot3d import Axes3D
 # and highlight the decision boundary in solid black.
 
 def dfContour(clf):
+
     ax = plt.gca()
     # The extent of xy space
     x_min, x_max = ax.get_xlim()
@@ -26,10 +27,11 @@ def dfContour(clf):
     h = 0.02    # mesh granularity
     xx, yy = np.meshgrid(np.arange(x_min, x_max, h),
                          np.arange(y_min, y_max, h))
-    mesh = np.c_[xx.ravel(),yy.ravel()]
+
+    mesh = np.c_[xx.ravel(), yy.ravel()]
     
     # evaluate the decision functrion at the grid points
-    Z = clf.predict_proba(mesh)[:,1]
+    Z = clf.predict_proba(mesh)[:, 1]
     
     # plot the contours of the decision function
     Z = Z.reshape(xx.shape)
@@ -40,11 +42,17 @@ def dfContour(clf):
     ax.contour(xx, yy, Z, levels=[0.5], colors='k', linestyles='solid')
 
 
-def MYdfContour(clf):
+def sigmoid(z):
+
+    return 1.0/(1.0 + np.exp(-z))
+
+
+def MYdfContour(V, v0, W, w0):
 
     ax = plt.gca()
     # The extent of xy space
     x_min, x_max = ax.get_xlim()
+
     y_min, y_max = ax.get_ylim()
 
     # form a mesh/grid over xy space
@@ -53,16 +61,25 @@ def MYdfContour(clf):
                          np.arange(y_min, y_max, h))
     mesh = np.c_[xx.ravel(), yy.ravel()]
 
-    # evaluate the decision functrion at the grid points
-    Z = clf.predict_proba(mesh)[:, 1]
+    # evaluate the decision function at the grid points
+
+    # using forward pass
+
+    U = np.dot(mesh, V) + v0  # MODIFIED
+
+    H = np.tanh(U)  # MODIFIED
+
+    Z = np.dot(H, W) + w0  # MODIFIED
+
+    O = sigmoid(Z) # MODIFIED
 
     # plot the contours of the decision function
-    Z = Z.reshape(xx.shape)
-    mylevels=np.linspace(0.0,1.0,11)
-    ax.contourf(xx, yy, Z, levels=mylevels, cmap=cm.RdBu, alpha=0.5)
+    O = O.reshape(xx.shape) # MODIFIED
+    mylevels=np.linspace(0.0, 1.0, 11)
+    ax.contourf(xx, yy, O, levels=mylevels, cmap=cm.RdBu, alpha=0.5) # MODIFIED
 
     # draw the decision boundary in solid black
-    ax.contour(xx, yy, Z, levels=[0.5], colors='k', linestyles='solid')
+    ax.contour(xx, yy, O, levels=[0.5], colors='k', linestyles='solid') # MODIFIED
     
 
 # Plot the decision function of classifier clf in 3D.
