@@ -154,7 +154,7 @@ def auc(precision, recall):
         area += precision[m]*(recall[m-1]-recall[m])
     return area
 
-'''
+
 DATA = generateData(1000, 10000)
 q1b(DATA)
 print('Question 1 (c)')
@@ -172,7 +172,7 @@ print('Question 1(l)')
 area = auc(precision, recall)
 print('Area under the curve: {}'.format(area))
 print('')
-'''
+
 
 # -----------------------------------------------------------------------------
 # Question 3
@@ -425,21 +425,24 @@ print("Question 3")
 DATA = generateData(10000, 10000)
 print("")
 print("Question 3 (a)")
-#diff_of_outputs()
+diff_of_outputs()
 print("")
 print('Question 3 (b)')
+
 K = 1000
 lossTrain, accTrainList, accTestList, epochs, V, v0, W, w0= bgd(3, K, 1)
 plot_loss(epochs, lossTrain, 'b', 'bgd')
 plot_acc(epochs, accTrainList, accTestList, 'b','bgd')
 plot_final(epochs, accTestList, 'Question 3(b): final test accuracy for bgd', K)
 plot_final(epochs, lossTrain, 'Question 3(b): final training loss for bgd', K)
-my_decision_boundaries(w0, W, v0, V, DATA[0], DATA[1])
+my_decision_boundaries(w0, W, v0, V, DATA[0], DATA[1],'b')
 print("")
+
 print("Question 3(c): ")
 K = 20
-lossTrain, accTrainList, accTestList, epochs, V, v0, W, w0 = sgd(3, K, 1)
+lossTrain, accTrainList, accTestList, epochs, V, v0, W, w0 = sgd(3, K, 0.1)
 plot_acc(epochs, accTrainList, accTestList, 'c', 'sgd')
 plot_loss(epochs, lossTrain, 'c', 'sgd')
 plot_final(epochs, accTestList, 'Question 3(c): final test accuracy for sgd', K)
 plot_final(epochs, lossTrain, 'Question 3(c): final training loss for sgd', K)
+my_decision_boundaries(w0, W, v0, V, DATA[0], DATA[1], 'c')
